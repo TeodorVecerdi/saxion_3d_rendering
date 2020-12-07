@@ -2,14 +2,7 @@
 
 
 #include "game/MGEGame.hpp"
-#include "mge/MGEDemo.hpp"
 #include "mge/core/AbstractGame.hpp"
-
-// #include "mge/MGEDemo.hpp"
-
-// #include "game/MGEGame.hpp"
-// #include "mge/MGEDemo.hpp"
-// #include "mge/core/AbstractGame.hpp"
 
 /**
  * Main entry point for the Micro Engine.
@@ -26,16 +19,13 @@
  * All documentation is contained within the HEADER files, not the CPP files if possible.
  *
  */
-int main(int argc, char** argv) {
+int main() {
     std::cout << "Starting Game" << std::endl;
+	
 	AbstractGame* game = new MGEGame();
 	game->initialize();
 	game->run();
-    /*
-    AbstractGame* game = new MGEDemo();
-    
-
-	delete game;*/
+	delete game;
 
     return 0;
 }
