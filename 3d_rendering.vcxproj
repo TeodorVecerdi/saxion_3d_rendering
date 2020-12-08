@@ -145,29 +145,14 @@
         </Link>
     </ItemDefinitionGroup>
     <ItemGroup Label="Compile">
-        <ClCompile Include="src/main.cpp" />
-        <ClCompile Include="src/mge/**/*.cpp" />
-        <ClCompile Include="src/game/**/*.cpp" />
+        <ClCompile Include="src/**/*.cpp" />
     </ItemGroup>
     <ItemGroup Label="Include">
-        <ClInclude Include="src/glm.hpp" />
-        <ClInclude Include="src/mge/**/*.h" />
-        <ClInclude Include="src/mge/**/*.hpp" />
-        <ClInclude Include="src/game/**/*.h" />
-        <ClInclude Include="src/game/**/*.hpp" />
+        <ClInclude Include="src/**/*.hpp" />
     </ItemGroup>
     
-    <ItemGroup Label="Assets MGE">
-        <Content Include="assets/mge/**" />
-        <Folder Include="assets/mge/fonts" />
-        <Folder Include="assets/mge/models" />
-        <Folder Include="assets/mge/textures" />
-    </ItemGroup>
-    <ItemGroup Label="Assets Game">
-        <Content Include="assets/game/**" />
-        <Folder Include="assets/game/fonts" />
-        <Folder Include="assets/game/models" />
-        <Folder Include="assets/game/textures" />
+    <ItemGroup Label="Assets">
+        <Content Include="assets/**" />
     </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
     <ImportGroup Label="ExtensionTargets">
