@@ -4,7 +4,6 @@
 //out vec4 color;
 uniform vec2 mousePosition;
 uniform vec2 viewportSize;
-in vec3 vertexPos;
 
 float map(in float s, in float a1, in float a2, in float b1, in float b2){
     return b1 + (s-a1)*(b2-b1)/(a2-a1);
@@ -12,7 +11,6 @@ float map(in float s, in float a1, in float a2, in float b1, in float b2){
 
 vec2 map(in vec2 s, in float a1, in float a2, in float b1, in float b2){
 	return vec2(map(s.x, a1, a2, b1, b2), map(s.y, a1, a2, b1, b2));
-   
 }
 
 void main() {
@@ -20,7 +18,7 @@ void main() {
 	
 
 	vec2 fragPos2 = vec2(ratio * gl_FragCoord.x / viewportSize.x, gl_FragCoord.y / viewportSize.y);
-	float mouseX = mousePosition.x * ratio + 0.45/ratio; 
+	float mouseX = mousePosition.x * ratio + 0.5/ratio; 
 	vec2 mouse = vec2(mouseX, mousePosition.y);
 	vec2 fragPosMapped = map(fragPos2, 0, 1, -1, 1);
 	

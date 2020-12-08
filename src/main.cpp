@@ -36,8 +36,16 @@ int main() {
 		return -1;
 	}
 
+	const std::string radialShader = "radial";
+	const std::string normalShader = "checkerboard";
+
 	//Create the shader program
-	GLuint programID = ShaderUtil::createProgram("assets/lighting.vert", "assets/lighting.frag");
+	GLuint programID = ShaderUtil::createProgram("assets/" + normalShader + ".vert", "assets/" + normalShader + ".frag");
+	GLuint radialProgramID = ShaderUtil::createProgram("assets/" + radialShader + ".vert", "assets/" + radialShader + ".frag");
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	//declare the data to upload
 	const GLfloat vertices[] = {
@@ -60,25 +68,24 @@ int main() {
 	//disconnect the funnel
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	/*const GLfloat colors[] {
-		//1 triangle, 3 vertices per triangle, 1 color per vertex, 3 "floats" per color RGB = 9 floats in total
-		1,0,0,
-		1,1,0,
-		0,1,0,
-		0,0,1
+	const GLfloat uvs[] {
+		0.0f, 0.0f,
+		1.0f,1.0f,
+		0.0f,1.0f,
+		1.0f,0.0f,
 	};
 
 	//create a handle to the buffer
-	GLuint colorBufferId;
-	glGenBuffers(1, &colorBufferId);
+	GLuint uvBufferId;
+	glGenBuffers(1, &uvBufferId);
 	//bind our buffer to the GL_ARRAY_BUFFER endpoint, since none was bound yet,
 	//a new array buffer for vertex color data will be created
-	glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, uvBufferId);
 	//stream all our data to the array buffer endpoint to which our vertexColorsBufferId is connected
 	//note that vertexColorsBufferId is not mentioned, instead the ARRAY_BUFFER is set as the data "sink"
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof uvs, uvs, GL_STATIC_DRAW);
 	//disconnect the funnel
-	glBindBuffer(GL_ARRAY_BUFFER, 0);*/
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// triangle indices ccw
 	GLuint indices[] = {
@@ -95,42 +102,70 @@ int main() {
 	sf::Clock clock;
 	float lastElapsedTime = 0.f;
 
-	/*glm::vec2 checkerboardRowsCols = glm::vec2(10);
+	glm::vec2 checkerboardRowsCols = glm::vec2(10);
 	const float checkerboardRowsColsChange = 10.0f;
 
 	const float pi = glm::pi<float>();
-	const float twoPi = 2.0f*pi;
+	const float twoPi = 2.0f * pi;
 	float rotation = 0;
 	float rotationSpeed = pi / 8;
 	const float rotationSpeedChange = 1.0f;
 
 	float scaleTime = 0.0f;
 	float checkerboardScaleSpeed = 1.0f;
-	const float checkerboardScaleChange = 0.5f;*/
+	const float checkerboardScaleChange = 0.5f;
+
+	float lightSize = 0.5f;
+	float lightStrength = 1.0f;
+	float ambientLight = 0.5f;
 
 	glClearColor(0, 0, 0, 1);
 	while (window.isOpen()) {
 		float elapsedTime = clock.getElapsedTime().asSeconds();
 		float deltaTime = elapsedTime - lastElapsedTime;
-		// scaleTime += deltaTime * checkerboardScaleSpeed;
+		scaleTime += deltaTime * checkerboardScaleSpeed;
+
+		const auto mousePos = sf::Mouse::getPosition(window);
+		// viewport mouse position (-1 -> 1)
+		glm::vec2 vpMousePos = glm::clamp(
+			glm::vec2((mousePos.x * 2.0f - 800) / 800.0f, -(mousePos.y * 2.0f - 600) / 600.0f), -1.0f, 1.0f);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Update
+		if (window.hasFocus()) {
 
-		/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) checkerboardRowsCols.x -= checkerboardRowsColsChange * deltaTime;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))checkerboardRowsCols.x += checkerboardRowsColsChange * deltaTime;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) checkerboardRowsCols.y -= checkerboardRowsColsChange * deltaTime;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) checkerboardRowsCols.y += checkerboardRowsColsChange * deltaTime;
-		
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) rotationSpeed -= rotationSpeedChange * deltaTime;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) rotationSpeed += rotationSpeedChange * deltaTime;
+			// Update
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) checkerboardRowsCols.x -= checkerboardRowsColsChange *
+				deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))checkerboardRowsCols.x += checkerboardRowsColsChange *
+				deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) checkerboardRowsCols.y -= checkerboardRowsColsChange *
+				deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) checkerboardRowsCols.y += checkerboardRowsColsChange *
+				deltaTime;
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) checkerboardScaleSpeed -= checkerboardScaleChange * deltaTime;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) checkerboardScaleSpeed += checkerboardScaleChange * deltaTime;
-		
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) rotationSpeed -= rotationSpeedChange * deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) rotationSpeed += rotationSpeedChange * deltaTime;
+
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) checkerboardScaleSpeed -= checkerboardScaleChange *
+				deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) checkerboardScaleSpeed += checkerboardScaleChange *
+				deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) lightSize -= 1.0f * deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) lightSize += 1.0f * deltaTime;
+			if (lightSize < 0) lightSize = 0;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) lightStrength -= 1.0f * deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) lightStrength += 1.0f * deltaTime;
+			if (lightStrength < 0) lightStrength = 0;
+			if (lightStrength > 1) lightStrength = 1;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) ambientLight -= 1.0f * deltaTime;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::V)) ambientLight += 1.0f * deltaTime;
+			if (ambientLight < 0) ambientLight = 0;
+			if (ambientLight > 1) ambientLight = 1;
+		}
+
 		rotation += rotationSpeed * deltaTime;
-		if(rotation > twoPi) rotation -= twoPi;*/
+		if (rotation > twoPi) rotation -= twoPi;
 
 		// End Update
 
@@ -138,25 +173,27 @@ int main() {
 		glUseProgram(programID);
 
 		//offset
-		/*glUniform2f(glGetUniformLocation(programID, "offset"), 0.5f * cos(elapsedTime), 0.5f * sin(elapsedTime));
-		glUniform2f(glGetUniformLocation(programID, "checkerboardRowsCols"), checkerboardRowsCols.x, checkerboardRowsCols.y);
+		glUniform2f(glGetUniformLocation(programID, "offset"), 0.5f * cos(elapsedTime), 0.5f * sin(elapsedTime));
+		glUniform2f(glGetUniformLocation(programID, "checkerboardRowsCols"), checkerboardRowsCols.x,
+		            checkerboardRowsCols.y);
 		glUniform2f(glGetUniformLocation(programID, "rotation"), cos(rotation), sin(rotation));
-		glUniform1f(glGetUniformLocation(programID, "checkerScale"), 0.5f * sin(scaleTime));*/
+		glUniform1f(glGetUniformLocation(programID, "checkerScale"), 0.5f * sin(scaleTime));
 
-		const auto mousePos = sf::Mouse::getPosition(window);
-		// viewport mouse position (-1 -> 1)
-		glm::vec2 vpMousePos = glm::clamp(glm::vec2((mousePos.x * 2.0f - 800)/800.0f, -(mousePos.y * 2.0f - 600)/600.0f), -1.0f, 1.0f);
-		// std::cout << "Mouse position: [" << mousePos.x << "," << mousePos.y << "]\nViewport position: [" << vpMousePos.x << "," << vpMousePos.y << "]\n";
+		// light
 		glUniform2f(glGetUniformLocation(programID, "mousePosition"), vpMousePos.x, vpMousePos.y);
 		glUniform2f(glGetUniformLocation(programID, "viewportSize"), 800, 600);
+		glUniform1f(glGetUniformLocation(programID, "lightSize"), lightSize);
+		glUniform1f(glGetUniformLocation(programID, "lightStrength"), lightStrength);
+		glUniform1f(glGetUniformLocation(programID, "ambientLight"), ambientLight);
 
 		//get index for the attributes in the shader
 		GLint vertexIndex = glGetAttribLocation(programID, "vertex");
+		GLint uvIndex = glGetAttribLocation(programID, "uv");
 		// GLint colorIndex = glGetAttribLocation(programID, "color");
 
 		//tell OpenGL that the data for the vertexIndex/colorIndex is coming in from an array
 		glEnableVertexAttribArray(vertexIndex);
-		// glEnableVertexAttribArray(colorIndex);
+		glEnableVertexAttribArray(uvIndex);
 
 		//bind the buffer with data.
 		//the moment this buffer is bound instead of 0, the last param of glVertexAttribPointer
@@ -168,8 +205,8 @@ int main() {
 
 		//send the data for this index to OpenGL, specifying it's format and structure
 		//colorIndex // 3 bytes per element // floats // don't normalize // the data itself
-		// glBindBuffer(GL_ARRAY_BUFFER, colorBufferId);
-		// glVertexAttribPointer(colorIndex, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glBindBuffer(GL_ARRAY_BUFFER, uvBufferId);
+		glVertexAttribPointer(uvIndex, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -178,7 +215,55 @@ int main() {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		glDisableVertexAttribArray(vertexIndex);
-		// glDisableVertexAttribArray (colorIndex);
+		glDisableVertexAttribArray (uvIndex);
+
+		//tell the GPU to use this program
+		glUseProgram(radialProgramID);
+
+		//offset
+		glUniform2f(glGetUniformLocation(radialProgramID, "offset"), 0.25f * cos(elapsedTime), 0.25f * sin(elapsedTime));
+		glUniform2f(glGetUniformLocation(radialProgramID, "checkerboardRowsCols"), checkerboardRowsCols.x,
+		            checkerboardRowsCols.y);
+		glUniform2f(glGetUniformLocation(radialProgramID, "rotation"), cos(rotation), sin(rotation));
+		glUniform1f(glGetUniformLocation(radialProgramID, "checkerScale"), 0.5f * sin(scaleTime));
+
+		// light
+		glUniform2f(glGetUniformLocation(radialProgramID, "mousePosition"), vpMousePos.x, vpMousePos.y);
+		glUniform2f(glGetUniformLocation(radialProgramID, "viewportSize"), 800, 600);
+		glUniform1f(glGetUniformLocation(radialProgramID, "lightSize"), lightSize);
+		glUniform1f(glGetUniformLocation(radialProgramID, "lightStrength"), lightStrength);
+		glUniform1f(glGetUniformLocation(radialProgramID, "ambientLight"), ambientLight);
+
+		//get index for the attributes in the shader
+		vertexIndex = glGetAttribLocation(radialProgramID, "vertex");
+		uvIndex = glGetAttribLocation(radialProgramID, "uv");
+		// GLint colorIndex = glGetAttribLocation(programID, "color");
+
+		//tell OpenGL that the data for the vertexIndex/colorIndex is coming in from an array
+		glEnableVertexAttribArray(vertexIndex);
+		glEnableVertexAttribArray(uvIndex);
+
+		//bind the buffer with data.
+		//the moment this buffer is bound instead of 0, the last param of glVertexAttribPointer
+		//is interpreted as an offset and not a pointer
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+		//send the data for this index to OpenGL, specifying it's format and structure
+		//vertexIndex // 3 bytes per element // floats // don't normalize // the data itself
+		glVertexAttribPointer(vertexIndex, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+		//send the data for this index to OpenGL, specifying it's format and structure
+		//colorIndex // 3 bytes per element // floats // don't normalize // the data itself
+		glBindBuffer(GL_ARRAY_BUFFER, uvBufferId);
+		glVertexAttribPointer(uvIndex, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+		glDrawElements(GL_POINTS, sizeof indices / sizeof indices[0], GL_UNSIGNED_INT, (void*)0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		glDisableVertexAttribArray(vertexIndex);
+		glDisableVertexAttribArray (uvIndex);
 
 		//display it
 		window.display();
@@ -189,9 +274,13 @@ int main() {
 			if (event.type == sf::Event::Closed) window.close();
 			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Escape) window.close();
 			if (event.type == sf::Event::Resized) glViewport(0, 0, event.size.width, event.size.height);
-			if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Space) {
+			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::Space) {
 				glDeleteProgram(programID);
-				programID = ShaderUtil::createProgram("assets/lighting.vert", "assets/lighting.frag");
+				programID = ShaderUtil::createProgram("assets/" + normalShader + ".vert",
+				                                      "assets/" + normalShader + ".frag");
+				glDeleteProgram(radialProgramID);
+				radialProgramID = ShaderUtil::createProgram("assets/" + radialShader + ".vert",
+                                                      "assets/" + radialShader + ".frag");
 			}
 		}
 

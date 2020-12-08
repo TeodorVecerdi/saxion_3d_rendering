@@ -2,11 +2,13 @@
 
 
 in vec3 vertex;
+in vec2 uv;
+
 uniform vec2 offset;
 uniform vec2 rotation;
 uniform float checkerScale;
 
-out vec2 uv;
+out vec2 texCoord;
 
 float map(in float s, in float a1, in float a2, in float b1, in float b2){
     return b1 + (s-a1)*(b2-b1)/(a2-a1);
@@ -20,6 +22,7 @@ void main (void) {
     vec2 scaledPos = rotatedPos * (1 + checkerScale);
     float uvX = map(scaledPos.x, -1, 1, 0, 1);
     float uvY = map(scaledPos.y, -1, 1, 0, 1);
-    uv = vec2(uvX, uvY);
+
+    texCoord = vec2(uv.x, uv.y);
 }
 
