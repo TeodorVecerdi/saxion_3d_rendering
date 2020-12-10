@@ -11,6 +11,21 @@
  * In a real life example, this code should include error checking and refactor into classes/functions.
  * In addition VAO's are missing.
  */
+glm::vec2 windowSize;
+glm::vec2 pixelSize;
+
+float mapRange(float s, float a1, float a2, float b1, float b2){
+	return b1 + (s-a1)*(b2-b1)/(a2-a1);
+}
+
+glm::vec2 screenToViewport(glm::vec2 screenPos) {
+	auto vpScreen = screenPos * pixelSize;
+	auto vp = glm::vec2(
+		mapRange(vpScreen.x, 0, 1, -1, 1),
+		mapRange(vpScreen.y, 0, 1, -1, 1)
+		);
+	return vp;
+}
 
 int main() {
 	//Open SFML Window == Valid OpenGL Context
@@ -27,6 +42,13 @@ int main() {
 		)
 	);
 
+	
+	const auto _wSize = window.getSize();
+	windowSize = glm::vec2(_wSize.x, _wSize.y);
+	const float pixelSizeW = 1.0f / windowSize.x;
+	const float pixelSizeH = 1.0f / windowSize.y;
+	pixelSize = glm::vec2(pixelSizeW, pixelSizeH);
+
 	window.setVerticalSyncEnabled(true);
 
 	//initialize glew to load all available opengl functions/extensions
@@ -35,9 +57,9 @@ int main() {
 		std::cout << "Could not initialize GLEW, byeeee!" << std::endl;
 		return -1;
 	}
-
+	
 	const std::string radialShader = "radial";
-	const std::string normalShader = "checkerboard";
+	const std::string normalShader = "loading_spinner";
 
 	//Create the shader program
 	GLuint programID = ShaderUtil::createProgram("assets/" + normalShader + ".vert", "assets/" + normalShader + ".frag");
@@ -46,15 +68,25 @@ int main() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_PROGRAM_POINT_SIZE);
-
+	auto vCenter = windowSize / 2.0f;
+	auto v1 = screenToViewport(vCenter - glm::vec2(150, 150));
+	auto v2 = screenToViewport(vCenter + glm::vec2(150, 150));
+	auto v3 = screenToViewport(vCenter - glm::vec2(150, -150));
+	auto v4 = screenToViewport(vCenter + glm::vec2(150, -150));
 	//declare the data to upload
 	const GLfloat vertices[] = {
 		//1 triangle, 3 vertices per triangle, 3 floats per vertex = 9 floats in total
-		-0.5f, -0.5f, 0,
-		0.5f, 0.5f, 0,
-		-0.5f, 0.5f, 0,
-		0.5f, -0.5f, 0,
+		v1.x,v1.y, 0,
+		v2.x,v2.y, 0,
+		v3.x,v3.y, 0,
+		v4.x,v4.y, 0,
 	};
+	/*
+	-0.5f, -0.5f, 0,
+	0.5f, 0.5f, 0,
+	-0.5f, 0.5f, 0,
+	0.5f, -0.5f, 0,
+	*/
 
 	//create a handle to the buffer
 	GLuint vertexBufferId;
@@ -119,11 +151,21 @@ int main() {
 	float lightStrength = 1.0f;
 	float ambientLight = 0.5f;
 
+	const float autoUpdateTime = 0.1f;
+	float autoUpdateTimer = 0.0f;
+
 	glClearColor(0, 0, 0, 1);
 	while (window.isOpen()) {
 		float elapsedTime = clock.getElapsedTime().asSeconds();
 		float deltaTime = elapsedTime - lastElapsedTime;
 		scaleTime += deltaTime * checkerboardScaleSpeed;
+
+		autoUpdateTimer += deltaTime;
+		if(autoUpdateTimer >= autoUpdateTime) {
+			autoUpdateTimer -= autoUpdateTime;
+			glDeleteProgram(programID);
+			programID = ShaderUtil::createProgram("assets/" + normalShader + ".vert", "assets/" + normalShader + ".frag");
+		}
 
 		const auto mousePos = sf::Mouse::getPosition(window);
 		// viewport mouse position (-1 -> 1)
@@ -217,7 +259,7 @@ int main() {
 		glDisableVertexAttribArray(vertexIndex);
 		glDisableVertexAttribArray (uvIndex);
 
-		//tell the GPU to use this program
+		/*//tell the GPU to use this program
 		glUseProgram(radialProgramID);
 
 		//offset
@@ -263,7 +305,7 @@ int main() {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		glDisableVertexAttribArray(vertexIndex);
-		glDisableVertexAttribArray (uvIndex);
+		glDisableVertexAttribArray (uvIndex);*/
 
 		//display it
 		window.display();
