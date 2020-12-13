@@ -227,6 +227,7 @@ int main() {
 		glUniform1f(glGetUniformLocation(programID, "lightSize"), lightSize);
 		glUniform1f(glGetUniformLocation(programID, "lightStrength"), lightStrength);
 		glUniform1f(glGetUniformLocation(programID, "ambientLight"), ambientLight);
+		glUniform1f(glGetUniformLocation(programID, "time"), elapsedTime);
 
 		//get index for the attributes in the shader
 		GLint vertexIndex = glGetAttribLocation(programID, "vertex");
