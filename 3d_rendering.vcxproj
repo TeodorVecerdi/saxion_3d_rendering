@@ -145,8 +145,8 @@
         </Link>
     </ItemDefinitionGroup>
     <ItemGroup Label="Compile">
-        <ClCompile Include="src/main.cpp"/>
-        <ClCompile Include="src/ShaderUtil.cpp"/>
+        <ClCompile Include="src/main.cpp" />
+        <ClCompile Include="src/ShaderUtil.cpp" />
 <!--        <ClCompile Include="src/**/*.cpp" />-->
     </ItemGroup>
     <ItemGroup Label="Include">

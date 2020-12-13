@@ -22,8 +22,9 @@ void main (void) {
     // Checkerboard pattern
     float facX = floor(texCoord.x * checkerboardRowsCols.x); 
     float facY = floor(texCoord.y * checkerboardRowsCols.y);
-    float factor = sign((mod(facX + facY, 2)));
-    vec4 color = mix(vec4(1),vec4(0,0,0,1),factor);
+    float factor = mod(facX + facY, 2);
+    
+    vec4 color = mix(vec4(0,0,1,1),vec4(1,1,0,1),factor);
     
     // Lighting
     float ratio = viewportSize.x/viewportSize.y;
@@ -34,11 +35,13 @@ void main (void) {
 	
     // Strength & Size
 	float dist = 1-distance(mousePositionMapped, pixelPosition);
+    
 	float gray = dist;
 	gray = gray-1+lightSize;
 	gray = map(gray, 0, lightSize, 0, 1);
+    
     gray = clamp(gray * lightStrength, 0, 1);
-
+    
     // Blending (Ambient Lighting)
     vec4 finalColor = (ambientLight + (1-ambientLight) * gray) * color;
     finalColor.a = 1;

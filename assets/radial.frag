@@ -33,9 +33,8 @@ void main() {
 		angle = map(angleRaw, -pi/2, pi/2, 0, 1);
 	}
 	
-	vec4 white = vec4(vec3(1), 1);
-	vec4 black = vec4(vec3(0), 1);
-
+	vec4 white = vec4(0.2,0.5,1,1);
+	vec4 black = vec4(1,0.4,0, 1);
 	bool col = mod(checkerboardRowsCols.x * angle, 2.0) < 1.0;
 	bool row = mod(checkerboardRowsCols.y * len, 2.0) < 1.0;
 	vec4 checkerColor;
