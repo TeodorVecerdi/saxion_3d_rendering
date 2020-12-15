@@ -44,39 +44,57 @@ void MGEGame::initialize() {
 
 //build the game _world
 void MGEGame::_initializeScene() {
-	//MESHES
+ //MESHES
 
-	//load a bunch of meshes we will be using throughout this demo
-	//each mesh only has to be loaded once, but can be used multiple times:
-	//F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
-	Mesh* planeMeshDefault = Mesh::load(config::MGE_MODEL_PATH + "plane.obj");
+    //load a bunch of meshes we will be using throughout this demo
+    //each mesh only has to be loaded once, but can be used multiple times:
+    //F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
+    Mesh* cubeMeshF = Mesh::load (config::MGE_MODEL_PATH+"cube_flat.obj");
+    Mesh* sphereMeshS = Mesh::load (config::MGE_MODEL_PATH+"sphere_smooth.obj");
+	Mesh* planeMeshDefault = Mesh::load (config::MGE_MODEL_PATH+"plane.obj");
 
-	//MATERIALS
+    //MATERIALS
 
-	//create some materials to display the cube, the plane and the light
-	AbstractMaterial* lightMaterial = new ColorMaterial(glm::vec3(1, 1, 0));
-	AbstractMaterial* runicStoneMaterial = new TextureMaterial(
-		Texture::load(config::MGE_TEXTURE_PATH + "runicfloor.png"));
+    //create some materials to display the cube, the plane and the light
+    AbstractMaterial* lightMaterial = new ColorMaterial (glm::vec3(1,1,0));
+    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::MGE_TEXTURE_PATH+"runicfloor.png"));
 
-	AbstractMaterial* checkerboardMaterial = new CheckerboardMaterial(2.0f);
-
-	//SCENE SETUP
-
-	//add camera first (it will be updated last)
-	Camera* camera = new Camera("camera", glm::vec3(0, 6, 7));
-	camera->rotate(glm::radians(-40.0f), glm::vec3(1, 0, 0));
-	_world->add(camera);
-	_world->setMainCamera(camera);
-
-	AbstractBehaviour* checkerboardBehaviour = new CheckerboardSizeBehaviour(1.0f);
-	
-	//add the floor
-	GameObject* plane = new GameObject("plane", glm::vec3(0, 0, 0));
-	plane->scale(glm::vec3(5, 5, 5));
+    //SCENE SETUP
+	GameObject* plane = new GameObject ("plane", glm::vec3(0,-5,0));
+	plane->scale(glm::vec3(20,5,20));
 	plane->setMesh(planeMeshDefault);
-	plane->setMaterial(checkerboardMaterial);
-	plane->setBehaviour(checkerboardBehaviour);
+	plane->setMaterial(runicStoneMaterial);
 	_world->add(plane);
+
+   //add camera first (it will be updated last)
+    Camera* camera = new Camera ("camera", glm::vec3(0,8,-10));
+    camera->rotate(glm::radians(180.0f), glm::vec3(0,1,0));
+    camera->rotate(glm::radians(-40.0f), glm::vec3(1,0,0));
+    _world->setMainCamera(camera);
+
+    //add a spinning sphere
+    GameObject* sphere = new GameObject ("sphere", glm::vec3(0,0,0));
+    sphere->scale(glm::vec3(.5,.5,.5));
+    sphere->setMesh (sphereMeshS);
+    sphere->setMaterial(runicStoneMaterial);
+
+    //add a light. Note that the light does ABSOLUTELY ZIP! NADA ! NOTHING !
+    //It's here as a place holder to get you started.
+    //Note how the texture material is able to detect the number of lights in the scene
+    //even though it doesn't implement any lighting yet!
+
+    GameObject* cube = new GameObject("cube", glm::vec3(0,4,0));
+    cube->scale(glm::vec3(1.f, 1.f, 1.f));
+    cube->setMesh(cubeMeshF);
+    cube->setMaterial(runicStoneMaterial);
+    cube->setBehaviour(new KeysBehaviour(5, 120));
+	_world->add(cube);
+
+	cube->add(sphere);
+	cube->add(camera);
+
+	sphere->setLocalPosition(glm::vec3(0, 3, 0));
+	cube->setLocalPosition(glm::vec3(0, -2, 0));
 }
 
 void MGEGame::_render() {
