@@ -3,12 +3,9 @@
 
 #include "glm.hpp"
 
-#include "mge/core/Renderer.hpp"
-
 #include "mge/core/Mesh.hpp"
 #include "mge/core/World.hpp"
 #include "mge/core/Texture.hpp"
-#include "mge/core/Light.hpp"
 #include "mge/core/Camera.hpp"
 #include "mge/core/GameObject.hpp"
 
@@ -16,7 +13,6 @@
 #include "mge/materials/ColorMaterial.hpp"
 #include "mge/materials/TextureMaterial.hpp"
 
-#include "mge/behaviours/RotatingBehaviour.hpp"
 #include "mge/behaviours/KeysBehaviour.hpp"
 
 #include "mge/util/DebugHud.hpp"
@@ -25,8 +21,7 @@
 #include "game/MGEGame.hpp"
 
 
-#include "behaviours/CheckerboardSizeBehaviour.h"
-#include "materials/CheckerboardMaterial.h"
+#include "behaviours/ObjectFollow.h"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEGame::MGEGame(): AbstractGame(), _hud(0) {
@@ -49,15 +44,15 @@ void MGEGame::_initializeScene() {
     //load a bunch of meshes we will be using throughout this demo
     //each mesh only has to be loaded once, but can be used multiple times:
     //F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
-    Mesh* cubeMeshF = Mesh::load (config::MGE_MODEL_PATH+"cube_flat.obj");
-    Mesh* sphereMeshS = Mesh::load (config::MGE_MODEL_PATH+"sphere_smooth.obj");
-	Mesh* planeMeshDefault = Mesh::load (config::MGE_MODEL_PATH+"plane.obj");
+    Mesh* cubeMeshF = Mesh::load (config::mge::MODEL_PATH+"cube_flat.obj");
+    Mesh* sphereMeshS = Mesh::load (config::mge::MODEL_PATH+"sphere_smooth.obj");
+	Mesh* planeMeshDefault = Mesh::load (config::mge::MODEL_PATH+"plane.obj");
 
     //MATERIALS
 
     //create some materials to display the cube, the plane and the light
     AbstractMaterial* lightMaterial = new ColorMaterial (glm::vec3(1,1,0));
-    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::MGE_TEXTURE_PATH+"runicfloor.png"));
+    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::mge::TEXTURE_PATH+"runicfloor.png"));
 
     //SCENE SETUP
 	GameObject* plane = new GameObject ("plane", glm::vec3(0,-5,0));
@@ -67,10 +62,9 @@ void MGEGame::_initializeScene() {
 	_world->add(plane);
 
    //add camera first (it will be updated last)
-    Camera* camera = new Camera ("camera", glm::vec3(0,8,-10));
-    camera->rotate(glm::radians(180.0f), glm::vec3(0,1,0));
-    camera->rotate(glm::radians(-40.0f), glm::vec3(1,0,0));
+    Camera* camera = new Camera ("camera", glm::vec3(0,2,-10));
     _world->setMainCamera(camera);
+	_world->add(camera);
 
     //add a spinning sphere
     GameObject* sphere = new GameObject ("sphere", glm::vec3(0,0,0));
@@ -91,10 +85,12 @@ void MGEGame::_initializeScene() {
 	_world->add(cube);
 
 	cube->add(sphere);
-	cube->add(camera);
+
+	auto* objectFollow = new ObjectFollow(cube, glm::vec3(1, 4, -10), 90+45, glm::normalize(glm::vec3(0,5,1)));
+	camera->setBehaviour(objectFollow);
 
 	sphere->setLocalPosition(glm::vec3(0, 3, 0));
-	cube->setLocalPosition(glm::vec3(0, -2, 0));
+	cube->setLocalPosition(glm::vec3(0, 0, 0));
 }
 
 void MGEGame::_render() {

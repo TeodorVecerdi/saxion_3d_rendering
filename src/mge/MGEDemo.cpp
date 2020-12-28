@@ -47,15 +47,15 @@ void MGEDemo::_initializeScene()
     //load a bunch of meshes we will be using throughout this demo
     //each mesh only has to be loaded once, but can be used multiple times:
     //F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
-    Mesh* planeMeshDefault = Mesh::load (config::MGE_MODEL_PATH+"plane.obj");
-    Mesh* cubeMeshF = Mesh::load (config::MGE_MODEL_PATH+"cube_flat.obj");
-    Mesh* sphereMeshS = Mesh::load (config::MGE_MODEL_PATH+"sphere_smooth.obj");
+    Mesh* planeMeshDefault = Mesh::load (config::mge::MODEL_PATH+"plane.obj");
+    Mesh* cubeMeshF = Mesh::load (config::mge::MODEL_PATH+"cube_flat.obj");
+    Mesh* sphereMeshS = Mesh::load (config::mge::MODEL_PATH+"sphere_smooth.obj");
 
     //MATERIALS
 
     //create some materials to display the cube, the plane and the light
     AbstractMaterial* lightMaterial = new ColorMaterial (glm::vec3(1,1,0));
-    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::MGE_TEXTURE_PATH+"runicfloor.png"));
+    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::mge::TEXTURE_PATH+"runicfloor.png"));
 
     //SCENE SETUP
 

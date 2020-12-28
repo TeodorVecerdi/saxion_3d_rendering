@@ -162,6 +162,7 @@
         <Folder Include="assets/mge/fonts" />
         <Folder Include="assets/mge/models" />
         <Folder Include="assets/mge/textures" />
+        <Folder Include="src\game\materials" />
     </ItemGroup>
     <ItemGroup Label="Assets Game">
         <Content Include="assets/game/**" />
