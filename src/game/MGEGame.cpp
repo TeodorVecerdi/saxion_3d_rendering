@@ -49,10 +49,10 @@ void MGEGame::_initializeScene() {
 	Mesh* planeMeshDefault = Mesh::load (config::mge::MODEL_PATH+"plane.obj");
 
     //MATERIALS
-
-    //create some materials to display the cube, the plane and the light
-    AbstractMaterial* lightMaterial = new ColorMaterial (glm::vec3(1,1,0));
-    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::mge::TEXTURE_PATH+"runicfloor.png"));
+    AbstractMaterial* colorA_Material = new ColorMaterial (glm::vec3(233.0f,196.0f,106.0f)/255.0f);
+    AbstractMaterial* colorB_Material = new ColorMaterial (glm::vec3(42.0f,157.0f,143.0f)/255.0f);
+    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::mge::Texture("runicfloor.png")));
+    AbstractMaterial* bricks_Material = new TextureMaterial (Texture::load (config::mge::Texture("bricks.jpg")));
 
     //SCENE SETUP
 	GameObject* plane = new GameObject ("plane", glm::vec3(0,-5,0));
@@ -69,7 +69,7 @@ void MGEGame::_initializeScene() {
     //add a spinning sphere
     GameObject* sphere = new GameObject ("sphere", glm::vec3(0,0,0));
     sphere->scale(glm::vec3(.5,.5,.5));
-    sphere->setMesh (sphereMeshS);
+    sphere->setMesh(sphereMeshS);
     sphere->setMaterial(runicStoneMaterial);
 
     //add a light. Note that the light does ABSOLUTELY ZIP! NADA ! NOTHING !
@@ -77,20 +77,31 @@ void MGEGame::_initializeScene() {
     //Note how the texture material is able to detect the number of lights in the scene
     //even though it doesn't implement any lighting yet!
 
-    GameObject* cube = new GameObject("cube", glm::vec3(0,4,0));
-    cube->scale(glm::vec3(1.f, 1.f, 1.f));
-    cube->setMesh(cubeMeshF);
-    cube->setMaterial(runicStoneMaterial);
-    cube->setBehaviour(new KeysBehaviour(5, 120));
-	_world->add(cube);
+    GameObject* mainCube = new GameObject("mainCube", glm::vec3(0,4,0));
+    mainCube->scale(glm::vec3(1.f, 1.f, 1.f));
+    mainCube->setMesh(cubeMeshF);
+    mainCube->setMaterial(bricks_Material);
+    mainCube->setBehaviour(new KeysBehaviour(5, 120));
+	_world->add(mainCube);
+	
+	GameObject* cubeLeft = new GameObject("cubeLeft", glm::vec3(-2,0,0));
+	cubeLeft->scale(glm::vec3(0.75f));
+	cubeLeft->setMesh(cubeMeshF);
+	cubeLeft->setMaterial(colorA_Material);
 
-	cube->add(sphere);
+	GameObject* cubeRight = new GameObject("cubeRight", glm::vec3(2,0,0));
+	cubeRight->scale(glm::vec3(0.75f));
+	cubeRight->setMesh(cubeMeshF);
+	cubeRight->setMaterial(colorB_Material);
 
-	auto* objectFollow = new ObjectFollow(cube, glm::vec3(1, 4, -10), 90+45, glm::normalize(glm::vec3(0,5,1)));
+	mainCube->add(sphere);
+	mainCube->add(cubeLeft);
+	mainCube->add(cubeRight);
+
+	auto* objectFollow = new ObjectFollow(mainCube, glm::vec3(1, 4, -10), 90+45, glm::normalize(glm::vec3(0,5,1)));
 	camera->setBehaviour(objectFollow);
 
-	sphere->setLocalPosition(glm::vec3(0, 3, 0));
-	cube->setLocalPosition(glm::vec3(0, 0, 0));
+	sphere->setLocalPosition(glm::vec3(0, 2, 0));
 }
 
 void MGEGame::_render() {
