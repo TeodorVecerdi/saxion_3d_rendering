@@ -1,10 +1,10 @@
 #pragma once
 #include "mge/behaviours/AbstractBehaviour.hpp"
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 class ObjectFollow : public AbstractBehaviour {
 public:
-	explicit ObjectFollow(GameObject* target, glm::vec3 offset, float angle, glm::vec3 axis, float followSpeed = 5.0f);
+	ObjectFollow(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles, float orbitSpeed = 30.0f);
 	virtual ~ObjectFollow();
 	void update(float ts) override;
 
@@ -12,17 +12,17 @@ public:
 	GameObject* GetTarget() const { return target; }
 	void SetOffset(glm::vec3 offset) { this->offset = offset; }
 	glm::vec3 GetOffset() const { return offset; }
-	void SetRotation(float angle, glm::vec3 axis);
-	std::pair<float, glm::vec3> GetRotation() const { return std::pair(angle, axis); }
+	void SetRotation(glm::vec3 eulerAngles);
+	glm::vec3 GetRotation() const { return eulerAngles; }
 
 private:
 	void UpdateRotation();
 	
 	GameObject* target;
 	glm::vec3 offset;
-	float angle;
-	glm::vec3 axis;
-	float followSpeed;
+	glm::vec3 eulerAngles;
+	glm::vec3 orbitEulerAngles;
+	float orbitSpeed;
 
 	bool rotationDirty;
 };

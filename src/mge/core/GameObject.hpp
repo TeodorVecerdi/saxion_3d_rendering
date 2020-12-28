@@ -52,6 +52,7 @@ class GameObject
 		AbstractBehaviour* getBehaviour() const;
 
 		virtual void update(float pStep);
+		virtual void lateUpdate(float pStep);
 
         //child management, note that add/remove and setParent are closely coupled.
         //a.add(b) has the same effect as b.setParent(a)

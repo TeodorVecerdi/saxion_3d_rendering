@@ -1,10 +1,12 @@
 #include <iostream>
 
 #include "AbstractGame.hpp"
+
+#include "Camera.hpp"
 #include "mge/core/Renderer.hpp"
 #include "mge/core/World.hpp"
 
-AbstractGame::AbstractGame():_window(NULL),_renderer(NULL),_world(NULL), _fps(0)
+AbstractGame::AbstractGame():_window(nullptr),_renderer(nullptr),_world(nullptr), _fps(0)
 {
     //ctor
 }
@@ -32,7 +34,7 @@ void AbstractGame::initialize() {
 
 void AbstractGame::_initializeWindow() {
 	std::cout << "Initializing window..." << std::endl;
-	_window = new sf::RenderWindow( sf::VideoMode(800,600), "My Game!", sf::Style::Default, sf::ContextSettings(24,8,0,3,3));
+	_window = new sf::RenderWindow( sf::VideoMode(1280,720), "My Game!", sf::Style::Default, sf::ContextSettings(24,8,0,3,3));
 	//_window->setVerticalSyncEnabled(true);
     std::cout << "Window initialized." << std::endl << std::endl;
 }
@@ -128,6 +130,7 @@ void AbstractGame::run()
 
 void AbstractGame::_update(float pStep) {
     _world->update(pStep);
+    _world->lateUpdate(pStep);
 }
 
 void AbstractGame::_render () {

@@ -180,6 +180,18 @@ void GameObject::update(float pStep)
     }
 }
 
+void GameObject::lateUpdate(float pStep)
+{
+    //make sure behaviour is updated after worldtransform is set
+    if (_behaviour) {
+        _behaviour->lateUpdate(pStep);
+    }
+
+    for (int i = _children.size()-1; i >= 0; --i ) {
+        _children[i]->lateUpdate(pStep);
+    }
+}
+
 void GameObject::_setWorldRecursively (World* pWorld) {
     _world = pWorld;
 

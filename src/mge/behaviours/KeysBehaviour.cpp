@@ -16,16 +16,16 @@ void KeysBehaviour::update( float pStep )
 	float turnSpeed = 0.0f;
 
 	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Up )) {
-		moveSpeed = _moveSpeed;
+		moveSpeed += _moveSpeed;
 	}
 	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Down )) {
-		moveSpeed = -_moveSpeed;
+		moveSpeed -= _moveSpeed;
 	}
 	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Right )) {
-		turnSpeed = -_turnSpeed;
+		turnSpeed -= _turnSpeed;
 	}
 	if ( sf::Keyboard::isKeyPressed( sf::Keyboard::Left )) {
-		turnSpeed = +_turnSpeed;
+		turnSpeed += _turnSpeed;
 	}
 	//translate the object in its own local space
 	_owner->translate( glm::vec3(0.0f, 0.0f, moveSpeed*pStep ) );

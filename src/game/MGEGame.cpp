@@ -21,6 +21,7 @@
 #include "game/MGEGame.hpp"
 
 
+#include "behaviours/CameraOrbit.h"
 #include "behaviours/ObjectFollow.h"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
@@ -44,13 +45,14 @@ void MGEGame::_initializeScene() {
     //load a bunch of meshes we will be using throughout this demo
     //each mesh only has to be loaded once, but can be used multiple times:
     //F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
-    Mesh* cubeMeshF = Mesh::load (config::mge::MODEL_PATH+"cube_flat.obj");
-    Mesh* sphereMeshS = Mesh::load (config::mge::MODEL_PATH+"sphere_smooth.obj");
-	Mesh* planeMeshDefault = Mesh::load (config::mge::MODEL_PATH+"plane.obj");
+    Mesh* cubeMeshF = Mesh::load (config::mge::Model("cube_flat.obj"));
+    Mesh* sphereMeshS = Mesh::load (config::mge::Model("sphere_smooth.obj"));
+	Mesh* planeMeshDefault = Mesh::load (config::mge::Model("plane.obj"));
 
     //MATERIALS
     AbstractMaterial* colorA_Material = new ColorMaterial (glm::vec3(233.0f,196.0f,106.0f)/255.0f);
     AbstractMaterial* colorB_Material = new ColorMaterial (glm::vec3(42.0f,157.0f,143.0f)/255.0f);
+    AbstractMaterial* colorC_Material = new ColorMaterial (glm::vec3(233.0f,56.0f,105.0f)/255.0f);
     AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::mge::Texture("runicfloor.png")));
     AbstractMaterial* bricks_Material = new TextureMaterial (Texture::load (config::mge::Texture("bricks.jpg")));
 
@@ -93,13 +95,20 @@ void MGEGame::_initializeScene() {
 	cubeRight->scale(glm::vec3(0.75f));
 	cubeRight->setMesh(cubeMeshF);
 	cubeRight->setMaterial(colorB_Material);
+	GameObject* cubeForward = new GameObject("cubeForward", glm::vec3(0,0,2));
+	cubeForward->scale(glm::vec3(0.75f));
+	cubeForward->setMesh(cubeMeshF);
+	cubeForward->setMaterial(colorC_Material);
 
 	mainCube->add(sphere);
 	mainCube->add(cubeLeft);
 	mainCube->add(cubeRight);
+	mainCube->add(cubeForward);
 
-	auto* objectFollow = new ObjectFollow(mainCube, glm::vec3(1, 4, -10), 90+45, glm::normalize(glm::vec3(0,5,1)));
-	camera->setBehaviour(objectFollow);
+	// auto* objectFollow = new ObjectFollow(mainCube, glm::vec3(0, 6, -6), glm::vec3(-45, -180, 0));
+	// camera->setBehaviour(objectFollow);
+	auto* cameraOrbit = new CameraOrbit(mainCube, glm::vec3(0, 0, -10));
+	camera->setBehaviour(cameraOrbit);
 
 	sphere->setLocalPosition(glm::vec3(0, 2, 0));
 }

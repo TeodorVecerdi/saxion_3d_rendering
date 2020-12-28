@@ -1,9 +1,18 @@
 #include "ObjectFollow.h"
 
+
+#include <iostream>
+#include <glm/vec3.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
+
+
+#include "game/utils/glm_utils.hpp"
 #include "mge/core/GameObject.hpp"
 
-ObjectFollow::ObjectFollow(GameObject* target, const glm::vec3 offset, const float angle, const glm::vec3 axis, const float followSpeed) : target(target), offset(offset), followSpeed(followSpeed) {
-	SetRotation(angle, axis);
+ObjectFollow::ObjectFollow(GameObject* target, const glm::vec3 offset, const glm::vec3 eulerAngles, const float orbitSpeed) : target(target), offset(offset),
+	orbitEulerAngles(0), orbitSpeed(orbitSpeed) {
+	SetRotation(eulerAngles);
 }
 
 ObjectFollow::~ObjectFollow() {
@@ -12,7 +21,9 @@ ObjectFollow::~ObjectFollow() {
 void ObjectFollow::update(float ts) {
 	if (target == nullptr) return;
 
-	if(rotationDirty) {
+	// UpdateOrbit(ts); // <- Can set `rotationDirty` to true if anything changed
+
+	if (rotationDirty) {
 		UpdateRotation();
 		rotationDirty = false;
 	}
@@ -22,9 +33,8 @@ void ObjectFollow::update(float ts) {
 	_owner->setLocalPosition(targetPosition);
 }
 
-void ObjectFollow::SetRotation(float angle, glm::vec3 axis) {
-	this->angle = angle;
-	this->axis = axis;
+void ObjectFollow::SetRotation(glm::vec3 eulerAngles) {
+	this->eulerAngles = eulerAngles;
 	rotationDirty = true;
 }
 
@@ -38,9 +48,46 @@ void ObjectFollow::UpdateRotation() {
 	decompose(transform, scale, rotation, translation);
 
 	// Calculate new matrix using original translation & scale, but with new rotation
-	const auto T = glm::translate(translation);
-	const auto R = glm::rotate(angle, axis);
-	const auto S = glm::scale(scale);
-	const auto TRS = T * R * S;
-	_owner->setTransform(TRS);
+	auto matrix = glm::mat4(1.0f);
+	matrix = translate(matrix, translation);
+	matrix = utils::glm::RotateEulerXYZ(matrix, eulerAngles);
+	matrix = glm::scale(matrix, scale);
+
+	_owner->setTransform(matrix);
 }
+
+/*void ObjectFollow::UpdateOrbit(float ts) {
+	const bool isLeftPressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+	const bool isRightPressed = sf::Mouse::isButtonPressed(sf::Mouse::Right);
+	const bool isShiftPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
+
+	if (!isLeftPressed && !isRightPressed) return;
+
+	if (isRightPressed) orbitEulerAngles.x += orbitSpeed * ts * (isShiftPressed ? -1 : 1);
+	if (orbitEulerAngles.x >= 360.0f) orbitEulerAngles.x -= 360.0f;
+
+	if (isLeftPressed) orbitEulerAngles.y += orbitSpeed * ts * (isShiftPressed ? -1 : 1);
+	if (orbitEulerAngles.y >= 360.0f) orbitEulerAngles.y -= 360.0f;
+
+	rotationDirty = true;
+}*/
+
+/*glm::vec3 ObjectFollow::CalculateOrbitPosition() {
+	auto camPos = _owner->getWorldPosition();
+	auto objPos = target->getWorldPosition();
+	
+	auto up = glm::vec3(0,1,0);
+	auto objToCam = camPos - objPos;
+	auto right = glm::cross(glm::normalize(objToCam), up);
+
+	// Fix up / get actual up
+	up = glm::cross(right, objToCam);
+
+	// Finally, calculate new position of camera
+	auto heading = glm::rotate(orbitEulerAngles.y, up);
+	auto pitch = glm::rotate(orbitEulerAngles.x, right);
+	auto relCamPos = heading * pitch * glm::vec4(objToCam.x, objToCam.y, objToCam.z, 1);
+	auto newCamPos = glm::xyz(relCamPos) + objPos;
+
+	return newCamPos;
+}*/
