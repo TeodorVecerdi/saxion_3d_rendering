@@ -5,9 +5,11 @@
 
 namespace mge {
 	/// Provides a global/static Input getter
-	/// Currently only for mouse position and delta as other functionality is already provided by SFML
+	/// Provides mouse position, delta and also allows mouse locking (and hiding)
 	class Input {
-	public:
+		friend class AbstractGame;
+
+	public: //static
 		static glm::vec2 ClampedMousePosition() {
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
@@ -39,17 +41,20 @@ namespace mge {
 			}
 
 			// Reset position if activating mouse lock
-			if (mouseLock != Input::mouseLock && mouseLock) {
-				mouseDelta = glm::vec2(0);
-				const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
-				sf::Mouse::setPosition(sfViewportCenter, *instance->windowReference);
+			if (mouseLock != Input::mouseLock) {
+				if (mouseLock) {
+					mouseDelta = glm::vec2(0);
+					const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
+					sf::Mouse::setPosition(sfViewportCenter, *instance->windowReference);
+				}
+				instance->SetMouseVisible(!mouseLock);
 			}
 
 			Input::mouseLock = mouseLock;
 		}
 
 	private:
-		explicit Input(const sf::RenderWindow* window) {
+		explicit Input(sf::RenderWindow* window) {
 			if (instance != nullptr) throw std::exception("Cannot create more than one `Input` instance");
 
 			instance = this;
@@ -59,13 +64,24 @@ namespace mge {
 		~Input() {
 		}
 
+		void FixMouseToCenter(const glm::vec2 viewportCenter) {
+			const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
+			sf::Mouse::setPosition(sfViewportCenter, *windowReference);
+		}
+
+		void SetMouseVisible(const bool visible) {
+			windowReference->setMouseCursorVisible(visible);
+		}
+
+		sf::RenderWindow* windowReference;
+	private: //static
 		static void OnViewportResized(const uint32_t width, const uint32_t height) {
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
 				return;
 			}
-			viewportSize.x = width;
-			viewportSize.y = height;
+			viewportSize.x = static_cast<float>(width);
+			viewportSize.y = static_cast<float>(height);
 			viewportCenter = viewportSize / 2;
 		}
 
@@ -82,8 +98,7 @@ namespace mge {
 
 			if (mouseLock) {
 				mouseDelta = glm::vec2(mouseX, mouseY) - viewportCenter;
-				const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
-				sf::Mouse::setPosition(sfViewportCenter, *instance->windowReference);
+				instance->FixMouseToCenter(viewportCenter);
 			} else {
 				mouseDelta = newClampedPosition - clampedMousePosition;
 			}
@@ -121,8 +136,5 @@ namespace mge {
 		inline static bool mouseLock = false;
 		inline static Input* instance = nullptr;
 
-		friend class AbstractGame;
-
-		const sf::RenderWindow* windowReference;
 	};
 }
