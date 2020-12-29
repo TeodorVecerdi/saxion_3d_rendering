@@ -8,9 +8,11 @@
 #include "mge/util/Input.hpp"
 
 CameraOrbit::CameraOrbit(GameObject* target, glm::vec3 offset, float orbitSpeed) : target(target), offset(offset), orbitSpeed(orbitSpeed), eulerAngles(0) {
+	mge::Input::SetMouseLock(true);
 }
 
 CameraOrbit::~CameraOrbit() {
+	mge::Input::SetMouseLock(false);
 }
 
 void CameraOrbit::lateUpdate(const float ts) {

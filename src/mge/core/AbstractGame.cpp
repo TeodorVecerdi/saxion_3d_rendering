@@ -7,7 +7,7 @@
 #include "mge/core/World.hpp"
 #include "mge/util/Input.hpp"
 
-AbstractGame::AbstractGame():_window(nullptr),_renderer(nullptr),_world(nullptr), _fps(0)
+AbstractGame::AbstractGame():_window(nullptr),_renderer(nullptr),_world(nullptr), _fps(0), _input(nullptr)
 {
     //ctor
 }
@@ -18,6 +18,7 @@ AbstractGame::~AbstractGame()
     delete _window;
     delete _renderer;
     delete _world;
+	delete _input;
 }
 
 void AbstractGame::initialize() {
@@ -38,6 +39,10 @@ void AbstractGame::_initializeWindow() {
 	_window = new sf::RenderWindow( sf::VideoMode(1280,720), "My Game!", sf::Style::Default, sf::ContextSettings(24,8,0,3,3));
 	//_window->setVerticalSyncEnabled(true);
     std::cout << "Window initialized." << std::endl << std::endl;
+
+	// Create an input instance. Keeping track of the object is not needed
+	// as it should live for the rest of the program.
+	_input = new mge::Input(_window);
 }
 
 void AbstractGame::_printVersionInfo() {
@@ -99,14 +104,17 @@ void AbstractGame::run()
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
 	const auto windowSize = _window->getSize();
+	auto mousePos = sf::Mouse::getPosition(*_window);
 	mge::Input::OnViewportResized(windowSize.x, windowSize.y);
+	mge::Input::ResetAll(mousePos.x, mousePos.y);
+	mge::Input::ResetDe
 
 	while (_window->isOpen()) {
 		timeSinceLastUpdate += updateClock.restart();
 		if (timeSinceLastUpdate > timePerFrame)
 		{
 			// Update mouse position
-			const auto mousePos = sf::Mouse::getPosition(*_window);
+			mousePos = sf::Mouse::getPosition(*_window);
 			mge::Input::Update(mousePos.x, mousePos.y);
 			
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );

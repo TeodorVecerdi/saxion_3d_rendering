@@ -5,6 +5,10 @@
 #include <GL/glew.h>
 #include <string>
 
+namespace mge {
+	class Input;
+}
+
 class World;
 class Renderer;
 
@@ -50,14 +54,15 @@ class AbstractGame
         //process any sfml window events (see SystemEventDispatcher/Listener)
         virtual void _processEvents();
 
-		sf::RenderWindow* _window;  //sfml window to render into
-		Renderer* _renderer;        //the renderer class to render the world
-		World* _world;              //the root game object that represents our scene
-		float _fps;                 //stores the real fps
+		sf::RenderWindow* _window;  // sfml window to render into
+		Renderer* _renderer;        // the renderer class to render the world
+		World* _world;              // the root game object that represents our scene
+		float _fps;                 // stores the real fps
+		mge::Input* _input;			// Input instance
 
     private:
-        AbstractGame(const AbstractGame&);
-        AbstractGame& operator=(const AbstractGame&);
+        AbstractGame(const AbstractGame&) = delete;
+        AbstractGame& operator=(const AbstractGame&) = delete;
 
 
 };
