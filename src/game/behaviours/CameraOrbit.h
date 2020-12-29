@@ -2,6 +2,7 @@
 #include "mge/behaviours/AbstractBehaviour.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/detail/type_quat.hpp>
 
 class CameraOrbit: public AbstractBehaviour{
 public:
@@ -13,13 +14,17 @@ private:
 	void UpdateInput(float ts);
 	
 	GameObject* target;
+	glm::vec3 currentPosition;
 	glm::vec3 offset;
 	glm::vec2 orbitSpeed;
 	float mouseSensitivity;
 	float scrollSensitivity;
 	
-	glm::vec3 eulerAngles;
+	glm::quat currentRotation;
+	glm::quat targetRotation;
 
 	float currentZoom = 0.0f;
 	glm::vec2 zoomRange;
+
+	glm::vec3 moveVelocity = {0,0,0};
 };
