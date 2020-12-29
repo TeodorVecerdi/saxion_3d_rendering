@@ -55,7 +55,7 @@ namespace mge {
 					const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
 					sf::Mouse::setPosition(sfViewportCenter, *instance->windowReference);
 				}
-				//instance->SetMouseVisible(!mouseLock);
+				instance->SetMouseVisible(!mouseLock);
 			}
 
 			Input::mouseLock = mouseLock;
@@ -95,6 +95,8 @@ namespace mge {
 		}
 
 		static void UpdateMousePosition(const int mouseX, const int mouseY) {
+			if(!isWindowFocused) return; 
+			
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
 				return;
@@ -124,6 +126,17 @@ namespace mge {
 
 			
 			Input::scrollDelta = scrollDelta;
+		}
+
+		static void ChangeWindowFocus(bool isWindowFocused) {
+			//         v- Shouldn't need this but I put it here just as a safe-guard
+			if(Input::isWindowFocused != isWindowFocused && mouseLock) {
+				instance->SetMouseVisible(!isWindowFocused);
+
+				if(isWindowFocused) instance->FixMouseToCenter(viewportCenter);
+			}
+			
+			Input::isWindowFocused = isWindowFocused;
 		}
 
 		/// @brief Resets `mousePosition` to `mouseX` and `mouseY`, and resets delta(s)
@@ -167,6 +180,7 @@ namespace mge {
 		inline static glm::vec2 viewportCenter = glm::vec2(0);
 
 		inline static bool mouseLock = false;
+		inline static bool isWindowFocused = true;
 		inline static Input* instance = nullptr;
 
 	};

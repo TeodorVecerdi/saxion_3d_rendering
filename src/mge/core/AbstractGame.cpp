@@ -177,6 +177,12 @@ void AbstractGame::_processEvents()
 			case sf::Event::MouseWheelScrolled:
 				mge::Input::UpdateScrollDelta(event.mouseWheelScroll.delta);
 				break;
+        	case sf::Event::LostFocus:
+        		mge::Input::ChangeWindowFocus(false);
+				break;
+        	case sf::Event::GainedFocus:
+        		mge::Input::ChangeWindowFocus(true);
+				break;
             case sf::Event::Resized:
                 //would be better to move this to the renderer
                 //this version implements nonconstrained match viewport scaling

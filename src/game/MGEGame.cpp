@@ -85,7 +85,7 @@ void MGEGame::_initializeScene() {
 	mainCube->scale(glm::vec3(1.f, 1.f, 1.f));
 	mainCube->setMesh(cubeMeshF);
 	mainCube->setMaterial(bricks_Material);
-	mainCube->setBehaviour(new KeysBehaviour(5, 120));
+	mainCube->setBehaviour(new KeysBehaviour(20, 120));
 	_world->add(mainCube);
 
 	GameObject* cubeLeft = new GameObject("cubeLeft", glm::vec3(-2, 0, 0));
