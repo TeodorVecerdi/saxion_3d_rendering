@@ -107,7 +107,6 @@ void AbstractGame::run()
 	auto mousePos = sf::Mouse::getPosition(*_window);
 	mge::Input::OnViewportResized(windowSize.x, windowSize.y);
 	mge::Input::ResetAll(mousePos.x, mousePos.y);
-	mge::Input::ResetDe
 
 	while (_window->isOpen()) {
 		timeSinceLastUpdate += updateClock.restart();
