@@ -2,6 +2,7 @@
 #include <iostream>
 #include <glm/vec2.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Window/Event.hpp>
 
 namespace mge {
 	/// Provides a global/static Input getter
@@ -83,20 +84,10 @@ namespace mge {
 
 		sf::RenderWindow* windowReference;
 	private: //static
-		static void OnViewportResized(const uint32_t width, const uint32_t height) {
-			if (instance == nullptr) {
-				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
-				return;
-			}
-			
-			viewportSize.x = static_cast<float>(width);
-			viewportSize.y = static_cast<float>(height);
-			viewportCenter = viewportSize / 2;
-		}
 
 		static void UpdateMousePosition(const int mouseX, const int mouseY) {
-			if(!isWindowFocused) return; 
-			
+			if (!isWindowFocused) return;
+
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
 				return;
@@ -124,19 +115,7 @@ namespace mge {
 				return;
 			}
 
-			
 			Input::scrollDelta = scrollDelta;
-		}
-
-		static void ChangeWindowFocus(bool isWindowFocused) {
-			//         v- Shouldn't need this but I put it here just as a safe-guard
-			if(Input::isWindowFocused != isWindowFocused && mouseLock) {
-				instance->SetMouseVisible(!isWindowFocused);
-
-				if(isWindowFocused) instance->FixMouseToCenter(viewportCenter);
-			}
-			
-			Input::isWindowFocused = isWindowFocused;
 		}
 
 		/// @brief Resets `mousePosition` to `mouseX` and `mouseY`, and resets delta(s)
@@ -168,6 +147,47 @@ namespace mge {
 				return;
 			}
 			scrollDelta = 0.0f;
+		}
+
+		static void OnEvent(const sf::Event event) {
+			switch (event.type) {
+				case sf::Event::MouseWheelScrolled:
+					UpdateScrollDelta(event.mouseWheelScroll.delta);
+					break;
+				case sf::Event::LostFocus:
+					ChangeWindowFocus(false);
+					break;
+				case sf::Event::GainedFocus:
+					ChangeWindowFocus(true);
+					break;
+				case sf::Event::Resized:
+					OnViewportResized(event.size.width, event.size.height);
+					break;
+				default:
+					break;
+			}
+		}
+
+		static void ChangeWindowFocus(bool isWindowFocused) {
+			//         v- Shouldn't need this but I put it here just as a safe-guard
+			if (Input::isWindowFocused != isWindowFocused && mouseLock) {
+				instance->SetMouseVisible(!isWindowFocused);
+
+				if (isWindowFocused) instance->FixMouseToCenter(viewportCenter);
+			}
+
+			Input::isWindowFocused = isWindowFocused;
+		}
+
+		static void OnViewportResized(const uint32_t width, const uint32_t height) {
+			if (instance == nullptr) {
+				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
+				return;
+			}
+
+			viewportSize.x = static_cast<float>(width);
+			viewportSize.y = static_cast<float>(height);
+			viewportCenter = viewportSize / 2;
 		}
 
 		// Use floating point vectors for easier math calculations, even though mouse position is always int

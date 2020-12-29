@@ -164,7 +164,7 @@ void AbstractGame::_processEvents()
         //SystemEventDispatcher / SystemEventListener pair which allows Listeners to
         //register with the dispatcher and then do something like:
         //SystemEventDispatcher::dispatchEvent(event);
-
+		mge::Input::OnEvent(event);
         switch (event.type) {
             case sf::Event::Closed:
                 exit = true;
@@ -174,20 +174,10 @@ void AbstractGame::_processEvents()
                     exit = true;
                 }
                 break;
-			case sf::Event::MouseWheelScrolled:
-				mge::Input::UpdateScrollDelta(event.mouseWheelScroll.delta);
-				break;
-        	case sf::Event::LostFocus:
-        		mge::Input::ChangeWindowFocus(false);
-				break;
-        	case sf::Event::GainedFocus:
-        		mge::Input::ChangeWindowFocus(true);
-				break;
             case sf::Event::Resized:
                 //would be better to move this to the renderer
                 //this version implements nonconstrained match viewport scaling
                 glViewport(0, 0, event.size.width, event.size.height);
-        		mge::Input::OnViewportResized(event.size.width, event.size.height);
                 break;
 
             default:
