@@ -7,47 +7,62 @@
 #include "mge/core/GameObject.hpp"
 #include "mge/util/Input.hpp"
 
-CameraOrbit::CameraOrbit(GameObject* target, glm::vec3 offset, float orbitSpeed, float mouseSensitivity) : target(target), offset(offset), orbitSpeed(orbitSpeed),
-                                                                                                           mouseSensitivity(mouseSensitivity), eulerAngles(0) {
+CameraOrbit::CameraOrbit(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles, float orbitSpeed, float mouseSensitivity, float scrollSensitivity) :
+	target(target), offset(offset), orbitSpeed(orbitSpeed), mouseSensitivity(mouseSensitivity), scrollSensitivity(scrollSensitivity), eulerAngles(eulerAngles), currentZoom(offset.z),
+	zoomRange(-2, -20) {
+
+	// Lock mouse to middle of screen and hide
 	mge::Input::SetMouseLock(true);
 }
 
 CameraOrbit::~CameraOrbit() {
+	// Unlock mouse and show
 	mge::Input::SetMouseLock(false);
 }
 
 void CameraOrbit::lateUpdate(const float ts) {
 
-	UpdateOrbit(ts);
-	auto selfWorld = _owner->getWorldPosition();
-	auto selfLocal = _owner->getLocalPosition();
-	auto diff = selfWorld - selfLocal;
+	UpdateInput(ts);
+
+	// Zoom test
+	auto zoomedOffset = offset;
+	zoomedOffset.z = currentZoom;
+
 	auto targetPosition = target->getWorldPosition();
-	auto translation = translate(diff + targetPosition);
-	auto rotation = utils::glm::RotateEulerXYZ(glm::mat4(1.0f), eulerAngles) * translate(-offset);
+	auto translation = translate(targetPosition);
+	auto rotation = utils::glm::RotateEulerXYZ(glm::mat4(1.0f), eulerAngles) * translate(-zoomedOffset);
 	auto matrix = translation * rotation;
 
 	_owner->setTransform(matrix);
 }
 
-void CameraOrbit::UpdateOrbit(const float ts) {
-
+void CameraOrbit::UpdateInput(const float ts) {
+	///----------------------------------------------------------
+	///						  UPDATE ORBIT
+	///----------------------------------------------------------
 	// Update speed
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) orbitSpeed.y -= 60.0f * ts;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) orbitSpeed.y += 60.0f * ts;
 	if (orbitSpeed.y < 0.0f) orbitSpeed.y = 0.0f;
 
-	const bool isLeftPressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-	if (!isLeftPressed) return;
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+		//											   v- Use yx to flip input as `x delta` should control y rotation and vice-versa 
+		const auto mouseDelta = yx(mge::Input::MouseDelta());
+		const auto mouseSensitivityDelta = mouseDelta * mouseSensitivity;
 
-	//											   v- Use yx to flip input as `x delta` should control y rotation and vice-versa 
-	const auto mouseDelta = yx(mge::Input::MouseDelta());
-	const auto sensitivityDelta = mouseDelta * mouseSensitivity;
+		eulerAngles += glm::vec3(mouseSensitivityDelta * orbitSpeed, 0);
 
-	eulerAngles += glm::vec3(sensitivityDelta * orbitSpeed, 0);
+		if (eulerAngles.x > 45.0f) eulerAngles.x = 45.0f;
+		if (eulerAngles.x < -45.0f) eulerAngles.x = -45.0f;
+		if (eulerAngles.y >= 360.0f) eulerAngles.y -= 360.0f;
+	}
 
-	// if (isRightPressed) eulerAngles.x += orbitSpeed.x * ts * (isShiftPressed ? -1 : 1);
-	if (eulerAngles.x >= 360.0f) eulerAngles.x -= 360.0f;
-	// if (isLeftPressed) eulerAngles.y += orbitSpeed.y * ts * (isShiftPressed ? -1 : 1);
-	if (eulerAngles.y >= 360.0f) eulerAngles.y -= 360.0f;
+	///----------------------------------------------------------
+	///						  UPDATE ZOOM
+	///----------------------------------------------------------
+	const auto scrollDelta = mge::Input::ScrollDelta();
+	const auto scrollSensitivityDelta = scrollDelta * scrollSensitivity;
+	currentZoom += scrollSensitivityDelta;
+	if(currentZoom > zoomRange.x) currentZoom = zoomRange.x;
+	if(currentZoom < zoomRange.y) currentZoom = zoomRange.y;
 }

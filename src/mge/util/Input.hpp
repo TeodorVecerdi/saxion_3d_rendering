@@ -34,6 +34,14 @@ namespace mge {
 			return mouseDelta;
 		}
 
+		static float ScrollDelta() {
+			if (instance == nullptr) {
+				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
+				return 0.0f;
+			}
+			return scrollDelta;
+		}
+
 		static void SetMouseLock(const bool mouseLock) {
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
@@ -47,7 +55,7 @@ namespace mge {
 					const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
 					sf::Mouse::setPosition(sfViewportCenter, *instance->windowReference);
 				}
-				instance->SetMouseVisible(!mouseLock);
+				//instance->SetMouseVisible(!mouseLock);
 			}
 
 			Input::mouseLock = mouseLock;
@@ -64,12 +72,12 @@ namespace mge {
 		~Input() {
 		}
 
-		void FixMouseToCenter(const glm::vec2 viewportCenter) {
+		void FixMouseToCenter(const glm::vec2 viewportCenter) const {
 			const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
 			sf::Mouse::setPosition(sfViewportCenter, *windowReference);
 		}
 
-		void SetMouseVisible(const bool visible) {
+		void SetMouseVisible(const bool visible) const {
 			windowReference->setMouseCursorVisible(visible);
 		}
 
@@ -80,12 +88,13 @@ namespace mge {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
 				return;
 			}
+			
 			viewportSize.x = static_cast<float>(width);
 			viewportSize.y = static_cast<float>(height);
 			viewportCenter = viewportSize / 2;
 		}
 
-		static void Update(const int mouseX, const int mouseY) {
+		static void UpdateMousePosition(const int mouseX, const int mouseY) {
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
 				return;
@@ -107,17 +116,32 @@ namespace mge {
 			clampedMousePosition = newClampedPosition;
 		}
 
-		/// @brief Resets `mousePosition` to `mouseX` and `mouseY`, and resets delta
+		static void UpdateScrollDelta(float scrollDelta) {
+			if (instance == nullptr) {
+				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
+				return;
+			}
+
+			
+			Input::scrollDelta = scrollDelta;
+		}
+
+		/// @brief Resets `mousePosition` to `mouseX` and `mouseY`, and resets delta(s)
 		/// @param mouseX The x coordinate of the mouse position to reset to
 		/// @param mouseY The y coordinate of the mouse position to reset to
 		static void ResetAll(int mouseX = 0, int mouseY = 0) {
+			if (instance == nullptr) {
+				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
+				return;
+			}
+
 			mousePosition = glm::vec2(mouseX, mouseY);
 			clampedMousePosition = glm::vec2(mouseX, mouseY);
-			ResetDelta();
+			ResetMouseDelta();
+			ResetScrollDelta();
 		}
 
-		/// @brief Resets delta position
-		static void ResetDelta() {
+		static void ResetMouseDelta() {
 			if (instance == nullptr) {
 				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
 				return;
@@ -125,10 +149,19 @@ namespace mge {
 			mouseDelta = glm::vec2(0);
 		}
 
+		static void ResetScrollDelta() {
+			if (instance == nullptr) {
+				std::cerr << "Input instance not created. Make sure to create an Input instance.\n";
+				return;
+			}
+			scrollDelta = 0.0f;
+		}
+
 		// Use floating point vectors for easier math calculations, even though mouse position is always int
 		inline static glm::vec2 mousePosition = glm::vec2(0);
 		inline static glm::vec2 clampedMousePosition = glm::vec2(0);
 		inline static glm::vec2 mouseDelta = glm::vec2(0);
+		inline static float scrollDelta = 0.0f;
 
 		inline static glm::vec2 viewportSize = glm::vec2(0);
 		inline static glm::vec2 viewportCenter = glm::vec2(0);

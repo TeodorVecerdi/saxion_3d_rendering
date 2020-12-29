@@ -40,8 +40,7 @@ void AbstractGame::_initializeWindow() {
 	//_window->setVerticalSyncEnabled(true);
     std::cout << "Window initialized." << std::endl << std::endl;
 
-	// Create an input instance. Keeping track of the object is not needed
-	// as it should live for the rest of the program.
+	// Create an input instance
 	_input = new mge::Input(_window);
 }
 
@@ -114,7 +113,7 @@ void AbstractGame::run()
 		{
 			// Update mouse position
 			mousePos = sf::Mouse::getPosition(*_window);
-			mge::Input::Update(mousePos.x, mousePos.y);
+			mge::Input::UpdateMousePosition(mousePos.x, mousePos.y);
 			
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -136,10 +135,9 @@ void AbstractGame::run()
             }
 
 			// Reset mouse delta
-			mge::Input::ResetDelta();
+			mge::Input::ResetMouseDelta();
+			mge::Input::ResetScrollDelta();
 		}
-
-		
 
 		_processEvents();
     }
@@ -176,6 +174,9 @@ void AbstractGame::_processEvents()
                     exit = true;
                 }
                 break;
+			case sf::Event::MouseWheelScrolled:
+				mge::Input::UpdateScrollDelta(event.mouseWheelScroll.delta);
+				break;
             case sf::Event::Resized:
                 //would be better to move this to the renderer
                 //this version implements nonconstrained match viewport scaling

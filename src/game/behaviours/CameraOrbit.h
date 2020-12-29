@@ -5,17 +5,21 @@
 
 class CameraOrbit: public AbstractBehaviour{
 public:
-	CameraOrbit(GameObject* target, glm::vec3 offset, float orbitSpeed = 45.0f, float mouseSensitivity = 0.001f);
+	CameraOrbit(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles = glm::vec3(0), float orbitSpeed = 45.0f, float mouseSensitivity = 0.001f, float scrollSensitivity = 0.5f);
 	virtual ~CameraOrbit();
 	void lateUpdate(float ts) override;
 
 private:
-	void UpdateOrbit(float ts);
+	void UpdateInput(float ts);
 	
 	GameObject* target;
 	glm::vec3 offset;
 	glm::vec2 orbitSpeed;
 	float mouseSensitivity;
+	float scrollSensitivity;
 	
 	glm::vec3 eulerAngles;
+
+	float currentZoom = 0.0f;
+	glm::vec2 zoomRange;
 };
