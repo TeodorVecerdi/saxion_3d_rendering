@@ -27,8 +27,8 @@ TextureMaterial::~TextureMaterial() {}
 void TextureMaterial::_lazyInitializeShader() {
     if (!_shader) {
         _shader = new ShaderProgram();
-        _shader->addShader(GL_VERTEX_SHADER, config::mge::SHADER_PATH+"texture.vs");
-        _shader->addShader(GL_FRAGMENT_SHADER, config::mge::SHADER_PATH+"texture.fs");
+        _shader->addShader(GL_VERTEX_SHADER, mge::config::SHADER_PATH+"texture.vs");
+        _shader->addShader(GL_FRAGMENT_SHADER, mge::config::SHADER_PATH+"texture.fs");
         _shader->finalize();
 
         //cache all the uniform and attribute indexes

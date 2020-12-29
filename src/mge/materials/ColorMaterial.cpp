@@ -18,8 +18,8 @@ void ColorMaterial::_lazyInitializeShader() {
     //this shader contains everything the material can do (it can render something in 3d using a single color)
     if (!_shader) {
         _shader = new ShaderProgram();
-        _shader->addShader(GL_VERTEX_SHADER, config::mge::SHADER_PATH+"color.vs");
-        _shader->addShader(GL_FRAGMENT_SHADER, config::mge::SHADER_PATH+"color.fs");
+        _shader->addShader(GL_VERTEX_SHADER, mge::config::SHADER_PATH+"color.vs");
+        _shader->addShader(GL_FRAGMENT_SHADER, mge::config::SHADER_PATH+"color.fs");
         _shader->finalize();
     }
 }

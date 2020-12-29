@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace config::mge {
+namespace mge::config {
 	const std::string MODEL_PATH("assets/mge/models/");
 	const std::string TEXTURE_PATH("assets/mge/textures/");
 	const std::string SHADER_PATH("assets/mge/shaders/");

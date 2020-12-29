@@ -45,16 +45,16 @@ void MGEGame::_initializeScene() {
     //load a bunch of meshes we will be using throughout this demo
     //each mesh only has to be loaded once, but can be used multiple times:
     //F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
-    Mesh* cubeMeshF = Mesh::load (config::mge::Model("cube_flat.obj"));
-    Mesh* sphereMeshS = Mesh::load (config::mge::Model("sphere_smooth.obj"));
-	Mesh* planeMeshDefault = Mesh::load (config::mge::Model("plane.obj"));
+    Mesh* cubeMeshF = Mesh::load (mge::config::Model("cube_flat.obj"));
+    Mesh* sphereMeshS = Mesh::load (mge::config::Model("sphere_smooth.obj"));
+	Mesh* planeMeshDefault = Mesh::load (mge::config::Model("plane.obj"));
 
     //MATERIALS
     AbstractMaterial* colorA_Material = new ColorMaterial (glm::vec3(233.0f,196.0f,106.0f)/255.0f);
     AbstractMaterial* colorB_Material = new ColorMaterial (glm::vec3(42.0f,157.0f,143.0f)/255.0f);
     AbstractMaterial* colorC_Material = new ColorMaterial (glm::vec3(233.0f,56.0f,105.0f)/255.0f);
-    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (config::mge::Texture("runicfloor.png")));
-    AbstractMaterial* bricks_Material = new TextureMaterial (Texture::load (config::mge::Texture("bricks.jpg")));
+    AbstractMaterial* runicStoneMaterial = new TextureMaterial (Texture::load (mge::config::Texture("runicfloor.png")));
+    AbstractMaterial* bricks_Material = new TextureMaterial (Texture::load (mge::config::Texture("bricks.jpg")));
 
     //SCENE SETUP
 	GameObject* plane = new GameObject ("plane", glm::vec3(0,-5,0));

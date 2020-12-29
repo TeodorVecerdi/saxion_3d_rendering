@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace config::game {
+namespace game::config {
 	const std::string MODEL_PATH("assets/game/models/");
 	const std::string TEXTURE_PATH("assets/game/textures/");
 	const std::string SHADER_PATH("assets/game/shaders/");

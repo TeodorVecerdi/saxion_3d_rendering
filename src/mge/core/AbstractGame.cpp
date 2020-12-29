@@ -5,6 +5,7 @@
 #include "Camera.hpp"
 #include "mge/core/Renderer.hpp"
 #include "mge/core/World.hpp"
+#include "mge/util/Input.hpp"
 
 AbstractGame::AbstractGame():_window(nullptr),_renderer(nullptr),_world(nullptr), _fps(0)
 {
@@ -97,11 +98,17 @@ void AbstractGame::run()
 	sf::Clock updateClock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
+	const auto windowSize = _window->getSize();
+	mge::Input::OnViewportResized(windowSize.x, windowSize.y);
+
 	while (_window->isOpen()) {
 		timeSinceLastUpdate += updateClock.restart();
-
 		if (timeSinceLastUpdate > timePerFrame)
 		{
+			// Update mouse position
+			const auto mousePos = sf::Mouse::getPosition(*_window);
+			mge::Input::Update(mousePos.x, mousePos.y);
+			
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 		    while (timeSinceLastUpdate > timePerFrame) {
@@ -121,9 +128,12 @@ void AbstractGame::run()
                 frameCount = 0;
             }
 
+			// Reset mouse delta
+			mge::Input::ResetDelta();
 		}
 
-		//empty the event queue
+		
+
 		_processEvents();
     }
 }
@@ -163,6 +173,7 @@ void AbstractGame::_processEvents()
                 //would be better to move this to the renderer
                 //this version implements nonconstrained match viewport scaling
                 glViewport(0, 0, event.size.width, event.size.height);
+        		mge::Input::OnViewportResized(event.size.width, event.size.height);
                 break;
 
             default:
