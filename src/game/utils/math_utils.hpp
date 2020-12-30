@@ -2,45 +2,91 @@
 
 #include <limits>
 #include <glm/glm.hpp>
-#include <glm/trigonometric.hpp>
-#include <glm/gtx/integer.hpp>
+#include <glm/gtx/quaternion.hpp>
 
+#include "constants.hpp"
+
+/// Most functions here are adapted from Unity's implementation in Mathf
 namespace utils::math {
-	inline auto Max(float a, float b) -> float {
+	inline float Max(float a, float b) {
 		return a > b ? a : b;
 	}
 
-	inline auto Min(float a, float b) -> float {
+	inline float Min(float a, float b) {
 		return a < b ? a : b;
 	}
 
-	inline auto Clamp(float value, float min, float max) -> float {
+	inline float Clamp(const float value, const float min, const float max) {
 		if (value < min) return min;
 		if (value > max) return max;
 		return value;
 	}
 
-	inline auto Clamp01(float value) -> float {
+	inline float Clamp01(const float value) {
 		return Clamp(value, 0.0f, 1.0f);
+	}
+
+	inline float Floor(const float value) {
+		return std::floorf(value);
+	}
+
+	inline float Abs(const float value) {
+		return std::fabsf(value);
+	}
+
+	inline float Repeat(const float t, const float length) {
+		return Clamp(t - Floor(t / length) * length, 0.0f, length);
+	}
+
+	inline float LerpAngle(const float from, const float to, const float t) {
+		float delta = Repeat(to - from, 360.0f);
+		if (delta > 180) delta -= 360;
+		return from + delta * Clamp01(t);
+	}
+
+	inline bool Approx(const float a, const float b) {
+		return Abs(b - a) < Max(0.000001f * Max(Abs(a), Abs(b)), constants::epsilon * 8.0f);
+	}
+
+	inline bool Approx(const float a, const float b, const float epsilon) {
+		return Abs(b - a) < epsilon;
+	}
+
+	inline bool Approx(const ::glm::vec3 a, const ::glm::vec3 b) {
+		return ::glm::length(::glm::abs(b - a)) < Max(0.000001f * Max(::glm::length(::glm::abs(a)), ::glm::length(::glm::abs(b))), constants::epsilon * 8.0f);
+	}
+
+	inline bool Approx(const ::glm::vec3 a, const ::glm::vec3 b, const float epsilon) {
+		return ::glm::length(::glm::abs(b - a)) < epsilon;
+	}
+
+	inline bool Approx(const ::glm::quat a, const ::glm::quat b) {
+		const auto dot = ::glm::dot(a, b);
+		return dot > 1.0f - 8.0f * constants::epsilon;
+	}
+
+	inline bool Approx(const ::glm::quat a, const ::glm::quat b, const float epsilon) {
+		const auto dot = ::glm::dot(a, b);
+		return dot > epsilon;
 	}
 
 	/// @brief Interpolates between /from/ and /to/ with smoothing at the limits
 	/// Adapted from Unity's implementation in Mathf 
-	inline auto SmoothStep(float from, float to, float t) -> float {
+	inline float SmoothStep(const float from, const float to, float t) {
 		t = Clamp01(t);
 		t = -2.0f * t * t * t + 3.0f * t * t;
 		return to * t + from * (1.0f - t);
 	}
 
 	/// @brief Interpolates between /from/ and /to/ with smoothing at the limits
-	inline auto SmoothStep(::glm::vec2 from, ::glm::vec2 to, float t) -> ::glm::vec2 {
+	inline ::glm::vec2 SmoothStep(const ::glm::vec2 from, const ::glm::vec2 to, float t) {
 		t = Clamp01(t);
 		t = -2.0f * t * t * t + 3.0f * t * t;
 		return to * t + from * (1.0f - t);
 	}
 
 	/// @brief Interpolates between /from/ and /to/ with smoothing at the limits
-	inline auto SmoothStep(::glm::vec3 from, ::glm::vec3 to, float t) -> ::glm::vec3 {
+	inline ::glm::vec3 SmoothStep(const ::glm::vec3 from, const ::glm::vec3 to, float t) {
 		t = Clamp01(t);
 		t = -2.0f * t * t * t + 3.0f * t * t;
 		return to * t + from * (1.0f - t);
@@ -150,25 +196,43 @@ namespace utils::math {
 
 	/// @brief Clamps a quaternion to be in /bounds/ in degrees
 	/// Adapted from 'https://forum.unity.com/threads/how-do-i-clamp-a-quaternion.370041/#post-5494723'
-	inline ::glm::quat ClampRotation(::glm::quat q, ::glm::vec3 bounds)
-	{
+	inline ::glm::quat ClampRotation(::glm::quat q, ::glm::vec3 bounds) {
 		q.x /= q.w;
 		q.y /= q.w;
 		q.z /= q.w;
 		q.w = 1.0f;
- 
+
 		float angleX = 2.0f * ::glm::degrees(::glm::atan(q.x));
 		angleX = Clamp(angleX, -bounds.x, bounds.x);
 		q.x = ::glm::tan(0.5f * ::glm::radians(angleX));
- 
+
 		float angleY = 2.0f * ::glm::degrees(::glm::atan(q.y));
 		angleY = Clamp(angleY, -bounds.y, bounds.y);
 		q.y = ::glm::tan(0.5f * ::glm::radians(angleY));
- 
+
 		float angleZ = 2.0f * ::glm::degrees(::glm::atan(q.z));
 		angleZ = Clamp(angleZ, -bounds.z, bounds.z);
 		q.z = ::glm::tan(0.5f * ::glm::radians(angleZ));
 
 		return q;
+	}
+
+	inline ::glm::quat EulerToQuatRadians(const ::glm::vec3 eulerRadians) {
+		const auto quatX = ::glm::angleAxis(eulerRadians.x, constants::right);
+		const auto quatY = ::glm::angleAxis(eulerRadians.y, constants::up);
+		const auto quatZ = ::glm::angleAxis(eulerRadians.z, constants::forward);
+		return quatX * quatY * quatZ;
+	}
+
+	inline ::glm::quat EulerToQuatDegrees(const ::glm::vec3 eulerDegrees) {
+		return EulerToQuatRadians(constants::degToRad * eulerDegrees);
+	}
+
+	inline ::glm::vec3 QuatToEulerRadians(const ::glm::quat quat) {
+		return ::glm::eulerAngles(quat);
+	}
+
+	inline ::glm::vec3 QuatToEulerDegrees(const ::glm::quat quat) {
+		return constants::radToDeg * QuatToEulerRadians(quat);
 	}
 }
