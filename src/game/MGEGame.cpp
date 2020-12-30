@@ -40,6 +40,37 @@ void MGEGame::initialize() {
 
 //build the game _world
 void MGEGame::_initializeScene() {
+	// -----------------------------------------
+	//		          SPLAT MAP
+	// -----------------------------------------
+	
+	/*                         /->   1-(r+g+b+a) = baseTex
+	*                        \/
+	* inputs => splatMap, baseTex, redTex, greenTex, blueTex, alphaTex
+	* rgba = sampleTexture(splatMap, uv)
+	* finalColor = mix using channels + textures
+	* gl_FragColor = finalColor
+	*
+	*
+	*
+	*
+	*	    TERRAIN UV COORDINATES
+	*	    
+	*      				    (1,1)
+	*       -----------------
+	*       |               |
+	*       |               |
+	*       |    terrain    |
+	*       |      mesh     |
+	*       |               |
+	*       |               |
+	*       -----------------
+	* (0,0)
+	*/
+	
+
+
+	
 	//MESHES
 
 	//load a bunch of meshes we will be using throughout this demo
