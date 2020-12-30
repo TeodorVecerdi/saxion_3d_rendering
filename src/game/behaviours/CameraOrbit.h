@@ -20,8 +20,9 @@ private:
 	float mouseSensitivity;
 	float scrollSensitivity;
 	
+	glm::vec3 targetRotation;
 	glm::quat currentRotation;
-	glm::quat targetRotation;
+	glm::quat targetRotationQuat;
 
 	float currentZoom = 0.0f;
 	glm::vec2 zoomRange;
