@@ -22,6 +22,7 @@
 
 #include "config.hpp"
 #include "behaviours/CameraOrbit.h"
+#include "materials/WobbleTextureMaterial.hpp"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEGame::MGEGame(): AbstractGame(), _hud(0) {
@@ -45,6 +46,7 @@ void MGEGame::_initializeScene() {
 	//each mesh only has to be loaded once, but can be used multiple times:
 	//F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
 	Mesh* cubeMeshF = Mesh::load(mge::config::Model("cube_flat.obj"));
+	Mesh* sphereMesh = Mesh::load(mge::config::Model("sphere_flat.obj"));
 	Mesh* sniperMesh = Mesh::load(game::config::Model("sniper/sniper2.obj"));
 	Mesh* planeMeshDefault = Mesh::load(mge::config::Model("plane.obj"));
 
@@ -53,7 +55,7 @@ void MGEGame::_initializeScene() {
 	AbstractMaterial* colorB_Material = new ColorMaterial(glm::vec3(42.0f, 157.0f, 143.0f) / 255.0f);
 	AbstractMaterial* colorC_Material = new ColorMaterial(glm::vec3(233.0f, 56.0f, 105.0f) / 255.0f);
 	AbstractMaterial* runicStoneMaterial = new TextureMaterial(Texture::load(mge::config::Texture("runicfloor.png")));
-	AbstractMaterial* bricks_Material = new TextureMaterial(Texture::load(mge::config::Texture("bricks.jpg")));
+	AbstractMaterial* bricks_Material = new WobbleTextureMaterial(Texture::load(mge::config::Texture("bricks.jpg")));
 	AbstractMaterial* sniperMaterial = new TextureMaterial(Texture::load(game::config::Texture("sniper/sniper-color.jpg")));
 
 	//SCENE SETUP
@@ -81,12 +83,12 @@ void MGEGame::_initializeScene() {
 	//Note how the texture material is able to detect the number of lights in the scene
 	//even though it doesn't implement any lighting yet!
 
-	GameObject* mainCube = new GameObject("mainCube", glm::vec3(0, 4, 0));
-	mainCube->scale(glm::vec3(1.f, 1.f, 1.f));
-	mainCube->setMesh(cubeMeshF);
-	mainCube->setMaterial(bricks_Material);
-	mainCube->setBehaviour(new KeysBehaviour(20, 120));
-	_world->add(mainCube);
+	GameObject* mainSphere = new GameObject("mainSphere", glm::vec3(0, 4, 0));
+	mainSphere->scale(glm::vec3(1.f, 1.f, 1.f));
+	mainSphere->setMesh(sphereMesh);
+	mainSphere->setMaterial(bricks_Material);
+	mainSphere->setBehaviour(new KeysBehaviour(20, 120));
+	_world->add(mainSphere);
 
 	GameObject* cubeLeft = new GameObject("cubeLeft", glm::vec3(-2, 0, 0));
 	cubeLeft->scale(glm::vec3(0.75f));
@@ -102,14 +104,14 @@ void MGEGame::_initializeScene() {
 	cubeForward->setMesh(cubeMeshF);
 	cubeForward->setMaterial(colorC_Material);
 
-	mainCube->add(sniper);
-	mainCube->add(cubeLeft);
-	mainCube->add(cubeRight);
-	mainCube->add(cubeForward);
+	mainSphere->add(sniper);
+	mainSphere->add(cubeLeft);
+	mainSphere->add(cubeRight);
+	mainSphere->add(cubeForward);
 
 	// auto* objectFollow = new ObjectFollow(mainCube, glm::vec3(0, 6, -6), glm::vec3(-45, -180, 0));
 	// camera->setBehaviour(objectFollow);
-	auto* cameraOrbit = new CameraOrbit(mainCube, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
+	auto* cameraOrbit = new CameraOrbit(mainSphere, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
 	camera->setBehaviour(cameraOrbit);
 
 }

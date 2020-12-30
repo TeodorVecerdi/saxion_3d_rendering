@@ -1,6 +1,6 @@
 #include "glm.hpp"
 
-#include "TextureMaterial.hpp"
+#include "WobbleTextureMaterial.hpp"
 
 #include <chrono>
 
@@ -14,21 +14,22 @@
 #include "mge/core/ShaderProgram.hpp"
 #include "mge/config.hpp"
 
-TextureMaterial::TextureMaterial(Texture * pDiffuseTexture):_diffuseTexture(pDiffuseTexture) {
+WobbleTextureMaterial::WobbleTextureMaterial(Texture * pDiffuseTexture):_diffuseTexture(pDiffuseTexture) {
     _lazyInitializeShader();
 }
 
-TextureMaterial::~TextureMaterial() {}
+WobbleTextureMaterial::~WobbleTextureMaterial() {}
 
-void TextureMaterial::_lazyInitializeShader() {
+void WobbleTextureMaterial::_lazyInitializeShader() {
     if (!_shader) {
         _shader = new ShaderProgram();
-        _shader->addShader(GL_VERTEX_SHADER, mge::config::Shader("texture.vs"));
-        _shader->addShader(GL_FRAGMENT_SHADER, mge::config::Shader("texture.fs"));
+        _shader->addShader(GL_VERTEX_SHADER, game::config::Shader("wobble.vert"));
+        _shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("texture.frag"));
         _shader->finalize();
 
         //cache all the uniform and attribute indexes
         _uMVPMatrix = _shader->getUniformLocation("mvpMatrix");
+        _uTime = _shader->getUniformLocation("time");
         _uDiffuseTexture = _shader->getUniformLocation("diffuseTexture");
 
         _aVertex = _shader->getAttribLocation("vertex");
@@ -37,11 +38,11 @@ void TextureMaterial::_lazyInitializeShader() {
     }
 }
 
-void TextureMaterial::setDiffuseTexture (Texture* pDiffuseTexture) {
+void WobbleTextureMaterial::setDiffuseTexture (Texture* pDiffuseTexture) {
     _diffuseTexture = pDiffuseTexture;
 }
 
-void TextureMaterial::render(World* pWorld, Mesh* pMesh, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
+void WobbleTextureMaterial::render(World* pWorld, Mesh* pMesh, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
     if (!_diffuseTexture) return;
 
     _shader->use();
@@ -62,6 +63,8 @@ void TextureMaterial::render(World* pWorld, Mesh* pMesh, const glm::mat4& pModel
     //pass in a precalculate mvp matrix (see texture material for the opposite)
     glm::mat4 mvpMatrix = pProjectionMatrix * pViewMatrix * pModelMatrix;
     glUniformMatrix4fv ( _uMVPMatrix, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
+    const auto totalTime = time(nullptr);
+    glUniform1f(_uTime, totalTime);
 
     //now inform mesh of where to stream its data
     pMesh->streamToOpenGL(_aVertex, _aNormal, _aUV);
