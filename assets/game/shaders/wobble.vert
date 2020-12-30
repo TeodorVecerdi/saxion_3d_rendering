@@ -104,6 +104,11 @@ float map(float s, float a1, float a2, float b1, float b2) {
     return b1 + (s-a1)*(b2-b1)/(a2-a1);
 }
 
+// /-----------------------------------------------------------------------------------------\
+// |                              4D simplex noise taken from                                |
+// |           https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83             |
+// \-----------------------------------------------------------------------------------------/
+
 void main() {
 	#if 1
 	vec4 randomInput = vec4(vertex, time);
