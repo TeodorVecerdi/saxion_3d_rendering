@@ -56,24 +56,22 @@ void CameraOrbit::lateUpdate(const float ts) {
 	///----------------------------------------------------------
 	///					CALCULATE SMOOTH ROTATION
 	///----------------------------------------------------------
-	if (!utils::math::Approx(currentAngleX, targetAngleX, utils::constants::halfDeg)) {
-		currentAngleX = glm::lerp(currentAngleX, targetAngleX, 0.2f);
-	}
+	if (!utils::math::Approx(currentAngleX, targetAngleX, utils::constants::halfDeg))
+		currentAngleX = glm::lerp(currentAngleX, targetAngleX, 0.1f);
 	const auto xQuat = glm::angleAxis(currentAngleX, utils::constants::right);
 
 	if (!utils::math::Approx(currentAngleY, targetAngleY, utils::constants::halfDeg))
-		currentAngleY = glm::lerp(currentAngleY, targetAngleY, 0.2f);
+		currentAngleY = glm::lerp(currentAngleY, targetAngleY, 0.1f);
 	const auto yQuat = glm::angleAxis(currentAngleY, utils::constants::up);
 
 	///----------------------------------------------------------
 	///						 SHENANIGANS
 	///----------------------------------------------------------
-
 	auto shenaniganQuatY = glm::quat_identity<float, glm::defaultp>();
 	auto shenaniganQuatX = glm::quat_identity<float, glm::defaultp>();
 
 	if constexpr (false) {
-		const auto shenanigan1 = (currentPosition - targetPosition);
+		const auto shenanigan1 = currentPosition - targetPosition;
 		const auto shenanigan2 = -10.0f * shenanigan1.x * utils::constants::degToRad; // heading
 		const auto shenanigan3 = shenanigan1.z * utils::constants::degToRad;          // pitch
 
