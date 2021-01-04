@@ -1,5 +1,4 @@
-#ifndef GAMEOBJECT_HPP
-#define GAMEOBJECT_HPP
+#pragma once
 
 #include <vector>
 #include "glm.hpp"
@@ -92,5 +91,3 @@ class GameObject
         GameObject (const GameObject&);
 		GameObject& operator= (const GameObject&);
 };
-
-#endif // GAMEOBJECT_HPP

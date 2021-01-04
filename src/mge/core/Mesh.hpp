@@ -1,5 +1,4 @@
-#ifndef MESH_HPP
-#define MESH_HPP
+#pragma once
 
 #include <vector>
 #include <GL/glew.h>
@@ -77,5 +76,3 @@ class Mesh
 		};
 
 };
-
-#endif // MESH_HPP

@@ -1,5 +1,4 @@
-#ifndef KEYSBEHAVIOUR_HPP
-#define KEYSBEHAVIOUR_HPP
+#pragma once
 
 #include "mge/behaviours/AbstractBehaviour.hpp"
 
@@ -19,5 +18,3 @@ class KeysBehaviour : public AbstractBehaviour
         float _moveSpeed;
         float _turnSpeed;
 };
-
-#endif // KEYSBEHAVIOUR_HPP

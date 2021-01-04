@@ -1,5 +1,4 @@
-#ifndef RENDERER_HPP
-#define RENDERER_HPP
+#pragma once
 
 #include <GL/glew.h>
 #include "glm.hpp"
@@ -93,6 +92,3 @@ protected:
 	//calls render on each and every child gameobject, material cannot be null!
 	void renderChildren(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix, bool pRecursive);
 };
-
-#endif // RENDERER_HPP
-

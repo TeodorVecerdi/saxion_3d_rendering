@@ -1,5 +1,4 @@
-#ifndef DEBUGHUD_HPP
-#define DEBUGHUD_HPP
+#pragma once
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -30,5 +29,3 @@ class DebugHud
         DebugHud& operator=(const DebugHud&);
 
 };
-
-#endif // DEBUGHUD_HPP

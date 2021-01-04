@@ -1,5 +1,4 @@
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#pragma once
 
 #include <string>
 #include "mge/core/GameObject.hpp"
@@ -9,25 +8,22 @@
  * The camera's own transform is used to generate a world-to-view matrix by taking the inverse of the camera transform.
  * The camera's perspective matrix is used in the MVP matrix creation.
  */
-class Camera : public GameObject
-{
-	public:
-		Camera(
-            std::string pName = "camera",
-            glm::vec3 pPosition = glm::vec3( 0.0f, 3.0f, 5.0f ),
-            glm::mat4 pProjectionMatrix = glm::perspective (glm::radians(60.0f), 1.77777778f, 0.1f, 1000.0f  )
-        );
+class Camera : public GameObject {
+public:
+	Camera(
+		std::string pName = "camera",
+		glm::vec3 pPosition = glm::vec3(0.0f, 3.0f, 5.0f),
+		glm::mat4 pProjectionMatrix = glm::perspective(glm::radians(60.0f), 1.77777778f, 0.1f, 1000.0f)
+	);
 
-		virtual ~Camera();
+	virtual ~Camera();
 
-        glm::mat4& getProjection();
+	glm::mat4& getProjection();
 
-	private:
-		glm::mat4 _projection;
+private:
+	glm::mat4 _projection;
 
-    private:
-        Camera (const Camera&);
-		Camera& operator= (const Camera&);
+private:
+	Camera(const Camera&);
+	Camera& operator=(const Camera&);
 };
-
-#endif // CAMERA_HPP

@@ -1,5 +1,4 @@
-#ifndef WORLD_HPP
-#define WORLD_HPP
+#pragma once
 
 #include "mge/core/GameObject.hpp"
 
@@ -28,6 +27,3 @@ class World : public GameObject
         World(const World&);
         World& operator=(const World&);
 };
-
-
-#endif // WORLD_HPP

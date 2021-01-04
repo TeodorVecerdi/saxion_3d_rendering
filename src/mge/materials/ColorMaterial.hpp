@@ -1,5 +1,4 @@
-#ifndef COLORMATERIAL_HPP
-#define COLORMATERIAL_HPP
+#pragma once
 
 #include "GL/glew.h"
 #include "mge/materials/AbstractMaterial.hpp"
@@ -31,4 +30,3 @@ class ColorMaterial : public AbstractMaterial
         glm::vec3 _diffuseColor;
 };
 
-#endif // COLORMATERIAL_HPP

@@ -1,5 +1,4 @@
-#ifndef SHADERPROGRAM_HPP
-#define SHADERPROGRAM_HPP
+#pragma once
 
 #include <GL/glew.h>
 #include <vector>
@@ -43,6 +42,3 @@ class ShaderProgram
 		std::string _readFile(const std::string &pShaderPath);
 		GLuint _compileShader (GLuint pShaderType, const std::string &pShaderSource);
 };
-
-#endif // SHADERPROGRAM_HPP
-

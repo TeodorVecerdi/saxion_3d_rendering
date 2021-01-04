@@ -1,5 +1,4 @@
-#ifndef ABSTRACTBEHAVIOUR_HPP
-#define ABSTRACTBEHAVIOUR_HPP
+#pragma once
 
 class GameObject;
 
@@ -35,5 +34,3 @@ class AbstractBehaviour
         AbstractBehaviour& operator=(const AbstractBehaviour&);
 
 };
-
-#endif // ABSTRACTBEHAVIOUR_HPP

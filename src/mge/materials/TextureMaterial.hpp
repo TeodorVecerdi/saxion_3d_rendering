@@ -1,5 +1,4 @@
-#ifndef TEXTUREMATERIAL_HPP
-#define TEXTUREMATERIAL_HPP
+#pragma once
 
 #include "mge/materials/AbstractMaterial.hpp"
 #include "GL/glew.h"
@@ -39,5 +38,3 @@ private:
 	TextureMaterial& operator=(const TextureMaterial&);
 
 };
-
-#endif // TEXTUREMATERIAL_HPP

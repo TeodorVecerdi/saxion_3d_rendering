@@ -1,5 +1,4 @@
-#ifndef TEXTURE_HPP
-#define TEXTURE_HPP
+#pragma once
 
 #include <map>
 #include <string>
@@ -21,5 +20,3 @@ class Texture
 	    //OpenGL id for texture buffer
 		GLuint _id;
 };
-
-#endif // TEXTURE_HPP

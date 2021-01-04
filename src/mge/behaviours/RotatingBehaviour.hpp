@@ -1,5 +1,4 @@
-#ifndef ROTATINGBEHAVIOUR_HPP
-#define ROTATINGBEHAVIOUR_HPP
+#pragma once
 
 #include "mge/behaviours/AbstractBehaviour.hpp"
 
@@ -15,5 +14,3 @@ class RotatingBehaviour : public AbstractBehaviour
 		virtual void update(float pStep);
 
 };
-
-#endif // ROTATINGBEHAVIOUR_HPP

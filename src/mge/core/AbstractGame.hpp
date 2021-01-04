@@ -1,9 +1,6 @@
-#ifndef ABSTRACTGAME_HPP
-#define ABSTRACTGAME_HPP
+#pragma once
 
 #include <SFML/Graphics.hpp>
-#include <GL/glew.h>
-#include <string>
 
 namespace mge {
 	class Input;
@@ -66,5 +63,3 @@ class AbstractGame
 
 
 };
-
-#endif // ABSTRACTGAME_HPP

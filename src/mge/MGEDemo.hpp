@@ -1,5 +1,4 @@
-#ifndef MGEDEMO_HPP
-#define MGEDEMO_HPP
+#pragma once
 
 #include "mge/core/AbstractGame.hpp"
 
@@ -34,5 +33,3 @@ class MGEDemo: public AbstractGame
         MGEDemo(const MGEDemo&);
         MGEDemo& operator=(const MGEDemo&);
 };
-
-#endif // MGEDEMO_HPP
