@@ -11,14 +11,14 @@ class World : public GameObject
         World();
 
 		void setMainCamera (Camera* pCamera);
-		Camera* getMainCamera();
+		Camera* getMainCamera() const;
 
         //only used internally, do not use from outside
         void registerLight (Light* pLight);
         void unregisterLight (Light* pLight);
 
-        Light* getLightAt (int pIndex);
-        int getLightCount();
+        Light* getLightAt (int pIndex) const;
+        int getLightCount() const;
 
 	private:
 	    Camera* _mainCamera;

@@ -22,7 +22,12 @@
 
 #include "config.hpp"
 #include "behaviours/CameraOrbit.h"
+#include "behaviours/SimpleLightBehaviour.h"
+#include "materials/LitColorMaterial.hpp"
+#include "materials/LitTextureMaterial.hpp"
 #include "materials/WobbleTextureMaterial.hpp"
+#include "mge/core/Light.hpp"
+#include "utils/constants.hpp"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEGame::MGEGame(): AbstractGame(), _hud(0) {
@@ -43,7 +48,7 @@ void MGEGame::_initializeScene() {
 	// -----------------------------------------
 	//		          SPLAT MAP
 	// -----------------------------------------
-	
+
 	/*                         /->   1-(r+g+b+a) = baseTex
 	*                        \/
 	* inputs => splatMap, baseTex, redTex, greenTex, blueTex, alphaTex
@@ -67,10 +72,7 @@ void MGEGame::_initializeScene() {
 	*       -----------------
 	* (0,0)
 	*/
-	
 
-
-	
 	//MESHES
 
 	//load a bunch of meshes we will be using throughout this demo
@@ -78,16 +80,24 @@ void MGEGame::_initializeScene() {
 	//F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
 	Mesh* cubeMeshF = Mesh::load(mge::config::Model("cube_flat.obj"));
 	Mesh* sphereMesh = Mesh::load(mge::config::Model("sphere_flat.obj"));
+	Mesh* sphereSmoothMesh = Mesh::load(mge::config::Model("sphere_smooth.obj"));
 	Mesh* sniperMesh = Mesh::load(game::config::Model("sniper/sniper2.obj"));
 	Mesh* planeMeshDefault = Mesh::load(mge::config::Model("plane.obj"));
 
 	//MATERIALS
-	AbstractMaterial* colorA_Material = new ColorMaterial(glm::vec3(233.0f, 196.0f, 106.0f) / 255.0f);
-	AbstractMaterial* colorB_Material = new ColorMaterial(glm::vec3(42.0f, 157.0f, 143.0f) / 255.0f);
-	AbstractMaterial* colorC_Material = new ColorMaterial(glm::vec3(233.0f, 56.0f, 105.0f) / 255.0f);
-	AbstractMaterial* runicStoneMaterial = new TextureMaterial(Texture::load(mge::config::Texture("runicfloor.png")));
+	AbstractMaterial* colorA_Material = new LitColorMaterial(glm::vec3(233.0f, 196.0f, 106.0f) / 255.0f);
+	AbstractMaterial* colorWhite_Material = new ColorMaterial(glm::vec3(1.0f));
+	AbstractMaterial* colorB_Material = new LitColorMaterial(glm::vec3(42.0f, 157.0f, 143.0f) / 255.0f);
+	LitColorMaterial* litMaterial = new LitColorMaterial(glm::vec3(0xba) / 255.0f);
+	litMaterial->SetAmbientIntensity(0.1f);
+	LitColorMaterial* sphereMat = new LitColorMaterial(glm::vec3(0xff, 0x25, 0x5a) / 255.0f);
+	sphereMat->SetShininess(32.0f);
+	sphereMat->SetSpecularIntensity(1.0f);
+	sphereMat->SetAmbientIntensity(0.1f);
+
+	LitTextureMaterial* runicStoneMaterial = new LitTextureMaterial(Texture::load(mge::config::Texture("runicfloor.png")));
 	AbstractMaterial* bricks_Material = new WobbleTextureMaterial(Texture::load(mge::config::Texture("bricks.jpg")));
-	AbstractMaterial* sniperMaterial = new TextureMaterial(Texture::load(game::config::Texture("sniper/sniper-color.jpg")));
+	LitTextureMaterial* sniperMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("sniper/sniper-color.jpg")));
 
 	//SCENE SETUP
 	GameObject* plane = new GameObject("plane", glm::vec3(0, -5, 0));
@@ -133,7 +143,13 @@ void MGEGame::_initializeScene() {
 	GameObject* cubeForward = new GameObject("cubeForward", glm::vec3(0, 0, 2));
 	cubeForward->scale(glm::vec3(0.75f));
 	cubeForward->setMesh(cubeMeshF);
-	cubeForward->setMaterial(colorC_Material);
+	cubeForward->setMaterial(litMaterial);
+
+	GameObject* bigSphere = new GameObject("bigSphere", glm::vec3(0, 2, 0));
+	bigSphere->scale(glm::vec3(3.0f));
+	bigSphere->setMesh(sphereSmoothMesh);
+	bigSphere->setMaterial(runicStoneMaterial);
+	_world->add(bigSphere);
 
 	mainSphere->add(sniper);
 	mainSphere->add(cubeLeft);
@@ -145,6 +161,31 @@ void MGEGame::_initializeScene() {
 	auto* cameraOrbit = new CameraOrbit(mainSphere, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
 	camera->setBehaviour(cameraOrbit);
 
+	// Light
+	Light* light = new Light("Light");
+	light->SetAttenuation(1, 1, 0);
+	light->SetLightType(LightType::POINT);
+	light->SetDiffuseColor(glm::vec3(1.0f, 1.0f, 1.0f));
+	auto* lightBeh = new SimpleLightBehaviour({0, 5, 0}, 10.0f);
+	light->setBehaviour(lightBeh);
+
+	Light* directional = new Light("Directional Light", {0, 10, 0});
+	const glm::vec3 lightDirection = glm::quat(glm::vec3(45, 45, 0) * utils::constants::degToRad) * utils::constants::forward;
+	directional->SetDirection(glm::normalize(lightDirection));
+	directional->rotate(utils::constants::deg45, utils::constants::up);
+	directional->rotate(utils::constants::deg45, utils::constants::right);
+	directional->SetLightType(LightType::DIRECTIONAL);
+	directional->SetDiffuseColor(glm::vec3(1.0f, 1.0f, 1.0f));
+
+	GameObject* lightCube = new GameObject("lightCube", glm::vec3(0, 0, 0));
+	// lightCube->rotate(-utils::constants::deg90, utils::constants::up);
+	lightCube->scale(glm::vec3(0.5f));
+	lightCube->setMesh(cubeMeshF);
+	lightCube->setMaterial(colorWhite_Material);
+	// directional->add(lightCube);
+	// _world->add(directional);
+	light->add(lightCube);
+	_world->add(light);
 }
 
 void MGEGame::_render() {

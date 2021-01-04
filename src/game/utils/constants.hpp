@@ -5,13 +5,21 @@
 
 namespace utils::constants {
 	// @formatter:off
+	/// Shorthand for writing glm::vec3(1.0, 0.0, 0.0)
 	constexpr glm::vec3 right    = { 1.0,  0.0,  0.0};
+	/// Shorthand for writing glm::vec3(-1.0, 0.0, 0.0)
 	constexpr glm::vec3 left     = {-1.0,  0.0,  0.0};
+	/// Shorthand for writing glm::vec3(0.0, 1.0, 0.0)
 	constexpr glm::vec3 up       = { 0.0,  1.0,  0.0};
+	/// Shorthand for writing glm::vec3(0.0, -1.0, 0.0)
 	constexpr glm::vec3 down     = { 0.0, -1.0,  0.0};
+	/// Shorthand for writing glm::vec3(0.0, 0.0, 1.0)
 	constexpr glm::vec3 forward  = { 0.0,  0.0,  1.0};
+	/// Shorthand for writing glm::vec3(0.0, 0.0, 1.0)
 	constexpr glm::vec3 backward = { 0.0,  0.0, -1.0};
+	/// Shorthand for writing glm::vec3(0.0, 0.0, 0.0)
 	constexpr glm::vec3 zero     = { 0.0,  0.0,  0.0};
+	/// Shorthand for writing glm::vec3(1.0, 1.0, 1.0)
 	constexpr glm::vec3 one      = { 1.0,  1.0,  1.0};
 	constexpr glm::vec3 positiveInfinity =   std::numeric_limits<float>::infinity() * one;
 	constexpr glm::vec3 negativeInfinity =  -std::numeric_limits<float>::infinity() * one;

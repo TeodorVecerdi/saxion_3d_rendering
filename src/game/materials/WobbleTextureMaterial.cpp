@@ -7,12 +7,9 @@
 
 #include "game/config.hpp"
 #include "mge/core/Texture.hpp"
-#include "mge/core/Light.hpp"
 #include "mge/core/World.hpp"
 #include "mge/core/Mesh.hpp"
-#include "mge/core/GameObject.hpp"
 #include "mge/core/ShaderProgram.hpp"
-#include "mge/config.hpp"
 #include "mge/util/Time.hpp"
 
 WobbleTextureMaterial::WobbleTextureMaterial(Texture * pDiffuseTexture):_diffuseTexture(pDiffuseTexture) {
