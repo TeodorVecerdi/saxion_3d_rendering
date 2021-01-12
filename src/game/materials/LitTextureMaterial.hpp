@@ -43,4 +43,5 @@ private:
 	float shininess;
 	glm::vec3 eye;
 
+	static inline constexpr size_t MAX_LIGHTS = 64;
 };

@@ -7,7 +7,6 @@ layout (location = 2) in vec2 i_uv;
 layout (location = 0) uniform mat4 projectionMatrix;
 layout (location = 1) uniform mat4 viewMatrix;
 layout (location = 2) uniform mat4 modelMatrix;
-layout (location = 3) uniform mat3 normalMatrix;
 
 out vec3 normal;
 out vec3 fragPosition;

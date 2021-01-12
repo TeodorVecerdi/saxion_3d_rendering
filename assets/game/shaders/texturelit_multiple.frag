@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_LIGHTS 128
+#define MAX_LIGHTS 64
 #define DIRECTIONAL 1
 #define POINT 2
 #define SPOTLIGHT 4
@@ -31,7 +31,9 @@ in vec2 uv;
 in vec3 normal;
 in vec3 fragPosition;
 
-layout (location = 4)  uniform vec3 eye;
+out vec4 FragColor;
+
+layout (location = 3)  uniform vec3 eye;
 uniform MaterialData material;
 
 uniform uint lightCount;
@@ -124,5 +126,15 @@ void main() {
 
     vec3 light = vec3(0);
 
-    gl_FragColor = vec4(light, 1);
+    for(int i = 0; i < lightCount; i++) {
+        if(lights[i].type == DIRECTIONAL) {
+            light += DirectionalLight(lights[i], norm, view, diffuseTexture);
+        } else if(lights[i].type == POINT) {
+            light += PointLight(lights[i], norm, view, diffuseTexture);
+        } else if(lights[i].type == SPOTLIGHT) {
+            light += Spotlight(lights[i], norm, view, diffuseTexture);
+        }
+    }
+
+    FragColor = vec4(light, 1);
 }

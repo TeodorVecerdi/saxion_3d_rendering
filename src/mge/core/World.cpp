@@ -31,6 +31,6 @@ Light* World::getLightAt(int pIndex) const {
 	return _lights[pIndex];
 }
 
-int World::getLightCount() const {
+uint32_t World::getLightCount() const {
 	return _lights.size();
 }

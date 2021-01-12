@@ -16,8 +16,8 @@ public:
 	void render(World* world, Mesh* mesh, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) override;
 
 	//in rgb values
-	void SetBaseColor(glm::vec3 diffuseColor);
-	glm::vec3 GetBaseColor() const { return baseColor; }
+	void SetDiffuseColor(glm::vec3 diffuseColor);
+	glm::vec3 GetDiffuseColor() const { return diffuseColor; }
 	void SetAmbientColor(glm::vec3 diffuseColor);
 	glm::vec3 GetAmbientColor() const { return xyz(ambientColor); }
 	void SetAmbientIntensity(float intensity);
@@ -36,10 +36,11 @@ private:
 	static void _lazyInitializeShader();
 
 	//this one is unique per instance of color material
-	glm::vec3 baseColor;
+	glm::vec3 diffuseColor;
 	glm::vec4 ambientColor; // rgb=color, a=intensity
 	glm::vec4 specularColor; // rgb=color, a=intensity
 	float shininess;
 	glm::vec3 eye;
 
+	static inline constexpr size_t MAX_LIGHTS = 64;
 };

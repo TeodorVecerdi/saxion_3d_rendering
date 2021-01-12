@@ -18,7 +18,7 @@ class World : public GameObject
         void unregisterLight (Light* pLight);
 
         Light* getLightAt (int pIndex) const;
-        int getLightCount() const;
+        uint32_t getLightCount() const;
 
 	private:
 	    Camera* _mainCamera;

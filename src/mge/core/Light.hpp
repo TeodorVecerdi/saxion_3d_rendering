@@ -10,13 +10,19 @@ enum LightType: uint32_t {
 };
 
 struct LightData {
-	LightType lightType;
-	glm::vec3 lightPosition;
-	glm::vec3 lightDirection;
-	glm::vec3 lightColor;
+	LightType type;
+
+	glm::vec3 position;
+	glm::vec3 direction;
+
+	glm::vec4 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+	
 	glm::vec3 attenuation; // x = const, y = linear, z = quadratic
-	float innerAngle; // spotlight
-	float outerAngle; // spotlight
+
+	float innerCutOff;
+	float outerCutOff;
 };
 
 /**
@@ -28,22 +34,28 @@ public:
 	Light(const std::string& name = nullptr, const glm::vec3& position = glm::vec3(2.0f, 10.0f, 5.0f));
 	virtual ~Light();
 
-	glm::vec3 GetDirection() const { return lightData.lightDirection; }
+	glm::vec3 GetDirection() const { return lightData.direction; }
 	void SetDirection(glm::vec3 direction);
 
-	glm::vec3 GetDiffuseColor() const { return lightData.lightColor; }
+	glm::vec3 GetDiffuseColor() const { return lightData.diffuse; }
 	void SetDiffuseColor(glm::vec3 color);
+
+	glm::vec4 GetAmbientColor() const { return lightData.ambient; }
+	void SetAmbientColor(glm::vec4 color);
+
+	glm::vec3 GetSpecularColor() const { return lightData.specular; }
+	void SetSpecularColor(glm::vec3 color);
 
 	glm::vec3 GetAttenuation() const { return lightData.attenuation; }
 	void SetAttenuation(glm::vec3 attenuation);
 	void SetAttenuation(float constant, float linear, float quadratic);
 
-	LightType GetLightType() const { return lightData.lightType; }
+	LightType GetLightType() const { return lightData.type; }
 	void SetLightType(LightType lightType);
 
-	float GetOuterAngle() const { return glm::acos(lightData.outerAngle);}
+	float GetOuterAngle() const { return glm::acos(lightData.outerCutOff);}
 	void SetOuterAngle(float outerAngle);
-	float GetInnerAngle() const { return glm::acos(lightData.innerAngle);}
+	float GetInnerAngle() const { return glm::acos(lightData.innerCutOff);}
 	void SetInnerAngle(float innerAngle);
 
 	LightData GetLightData() const;

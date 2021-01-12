@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_LIGHTS 128
+#define MAX_LIGHTS 64
 #define DIRECTIONAL 1
 #define POINT 2
 #define SPOTLIGHT 4
@@ -30,7 +30,9 @@ struct LightData {
 in vec3 normal;
 in vec3 fragPosition;
 
-layout (location = 4)  uniform vec3 eye;
+out vec4 FragColor;
+
+layout (location = 3)  uniform vec3 eye;
 uniform MaterialData material;
 
 uniform uint lightCount;
@@ -133,5 +135,5 @@ void main() {
         }
     }
 
-    gl_FragColor = vec4(light, 1);
+    FragColor = vec4(light, 1);
 }

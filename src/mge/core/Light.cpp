@@ -6,6 +6,8 @@
 
 Light::Light(const std::string& name, const glm::vec3& position) : GameObject(name, position) {
 	SetDiffuseColor(utils::constants::one);
+	SetAmbientColor({utils::constants::one, 0.1f});
+	SetSpecularColor(utils::constants::one);
 	SetAttenuation(glm::vec3(1,1,0)); // linear falloff
 	SetLightType(POINT);
 }
@@ -14,11 +16,19 @@ Light::~Light() {
 }
 
 void Light::SetDirection(const glm::vec3 direction) {
-	lightData.lightDirection = direction;
+	lightData.direction = direction;
 }
 
 void Light::SetDiffuseColor(const glm::vec3 color) {
-	lightData.lightColor = color;
+	lightData.diffuse = color;
+}
+
+void Light::SetAmbientColor(glm::vec4 color) {
+	lightData.ambient = color;
+}
+
+void Light::SetSpecularColor(glm::vec3 color) {
+	lightData.specular = color;
 }
 
 void Light::SetAttenuation(const glm::vec3 attenuation) {
@@ -30,22 +40,22 @@ void Light::SetAttenuation(const float constant, const float linear, const float
 }
 
 void Light::SetLightType(const LightType lightType) {
-	lightData.lightType = lightType;
+	lightData.type = lightType;
 }
 
 void Light::SetOuterAngle(float outerAngle) {
-	lightData.outerAngle = glm::cos(outerAngle);
+	lightData.outerCutOff = glm::cos(outerAngle);
 }
 
 void Light::SetInnerAngle(float innerAngle) {
-	lightData.innerAngle = glm::cos(innerAngle);
+	lightData.innerCutOff = glm::cos(innerAngle);
 }
 
 LightData Light::GetLightData() const {
 	const auto worldPosition = getWorldPosition();
 	
 	auto copyLightData = lightData;
-	copyLightData.lightPosition = worldPosition;
+	copyLightData.position = worldPosition;
 	return copyLightData;
 }
 
