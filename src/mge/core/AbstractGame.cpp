@@ -95,7 +95,6 @@ void AbstractGame::run() {
 	int frameCount = 0;
 	float timeSinceLastFPSCalculation = 0;
 
-	//settings to make sure the update loop runs at 60 fps
 	sf::Clock updateClock;
 
 	const auto windowSize = _window->getSize();

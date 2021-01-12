@@ -111,7 +111,7 @@ float map(float s, float a1, float a2, float b1, float b2) {
 // \-----------------------------------------------------------------------------------------/
 
 void main() {
-	#if 1
+	#if 0
 	vec4 randomInput = vec4(vertex, time);
 	float rand = snoise(randomInput);
 	float len = 0.5 + map(rand, -1, 1, 0, 0.5);

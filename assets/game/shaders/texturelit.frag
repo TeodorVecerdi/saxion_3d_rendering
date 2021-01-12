@@ -17,6 +17,8 @@ layout (location = 10) uniform vec3 lightPosition;
 layout (location = 11) uniform vec3 lightDirection;
 layout (location = 12) uniform vec3 lightColor;
 layout (location = 13) uniform vec3 attenuation; // x = const, y = linear, z = quadratic
+layout (location = 14) uniform float outerAngle;
+layout (location = 15) uniform float innerAngle;
 
 const uint DIRECTIONAL = 1;
 const uint POINT = 2;
@@ -44,7 +46,38 @@ vec3 pointLight() {
 }
 
 vec3 spotlight() {
-    return vec3(1);
+    vec3 norm = normalize(normal);
+    vec3 AMBIENT = ambientColor.a * ambientColor.rgb;
+    
+    vec3 DIFFUSE = vec3(0);
+    vec3 SPECULAR = vec3(0);
+
+    vec3 lightDir = normalize(lightPosition - fragPosition);
+    
+    float theta = dot(lightDir, normalize(-lightDirection));
+    float epsilon = innerAngle - outerAngle;
+    float intensity = clamp((theta-outerAngle)/epsilon,0.0,1.0);
+    
+    float dist = distance(lightPosition, fragPosition);
+    float distSqr = dist * dist;
+    float attn = 1.0 / (attenuation.x + attenuation.y * dist + attenuation.z * distSqr);
+    float diffuseAmount = max(dot(norm, lightDir), 0.0);
+    DIFFUSE = diffuseAmount * lightColor;
+    
+    vec3 r = reflect(-lightDir, norm);
+    vec3 v = normalize(eye - fragPosition);
+    float shineFactor = pow(max(dot(r, v), 0), shininess);
+    SPECULAR = specularColor.a * shineFactor * lightColor * specularColor.rgb;
+
+    AMBIENT *= attn;
+    DIFFUSE *= attn;
+    SPECULAR *= attn;
+
+    DIFFUSE *= intensity;
+    SPECULAR *= intensity;
+  
+    
+    return (AMBIENT + DIFFUSE + SPECULAR);
 }
 
 vec3 directionalLight() {

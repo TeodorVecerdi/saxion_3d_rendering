@@ -22,6 +22,7 @@
 
 #include "config.hpp"
 #include "behaviours/CameraOrbit.h"
+#include "behaviours/ObjectFollow.h"
 #include "behaviours/SimpleLightBehaviour.h"
 #include "materials/LitColorMaterial.hpp"
 #include "materials/LitTextureMaterial.hpp"
@@ -157,7 +158,7 @@ void MGEGame::_initializeScene() {
 	mainSphere->add(cubeRight);
 	mainSphere->add(cubeForward);
 
-	// auto* objectFollow = new ObjectFollow(mainCube, glm::vec3(0, 6, -6), glm::vec3(-45, -180, 0));
+	// auto* objectFollow = new ObjectFollow(mainSphere, glm::vec3(0, 6, -6), glm::vec3(-45, -180, 0));
 	// camera->setBehaviour(objectFollow);
 	auto* cameraOrbit = new CameraOrbit(mainSphere, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
 	camera->setBehaviour(cameraOrbit);
@@ -175,7 +176,10 @@ void MGEGame::_initializeScene() {
 	directional->SetDirection(glm::normalize(lightDirection));
 	directional->rotate(utils::constants::deg45, utils::constants::up);
 	directional->rotate(utils::constants::deg45, utils::constants::right);
-	directional->SetLightType(LightType::DIRECTIONAL);
+	directional->SetAttenuation(1, 0.0f, 0.0f);
+	directional->SetLightType(LightType::SPOTLIGHT);
+	directional->SetOuterAngle(utils::constants::oneDeg * 17.5f);
+	directional->SetInnerAngle(utils::constants::oneDeg * 12.5f);
 	directional->SetDiffuseColor(glm::vec3(1.0f, 1.0f, 1.0f));
 
 	GameObject* lightCube = new GameObject("lightCube", glm::vec3(0, 0, 0));

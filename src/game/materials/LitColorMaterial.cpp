@@ -80,6 +80,8 @@ void LitColorMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMa
 	glUniform3fv(11, 1, value_ptr(lightData.lightDirection));
 	glUniform3fv(12, 1, value_ptr(lightData.lightColor));
 	glUniform3fv(13, 1, value_ptr(lightData.attenuation));
+	glUniform1f(14, lightData.outerAngle);
+	glUniform1f(15, lightData.innerAngle);
 
 	// fix non-uniform scaling (normal matrix)
 	auto tiModelMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));

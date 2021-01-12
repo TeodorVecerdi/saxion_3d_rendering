@@ -1,12 +1,5 @@
 #include "ObjectFollow.h"
 
-
-#include <iostream>
-#include <glm/vec3.hpp>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Mouse.hpp>
-
-
 #include "game/utils/glm_utils.hpp"
 #include "mge/core/GameObject.hpp"
 
@@ -21,14 +14,12 @@ ObjectFollow::~ObjectFollow() {
 void ObjectFollow::update(float ts) {
 	if (target == nullptr) return;
 
-	// UpdateOrbit(ts); // <- Can set `rotationDirty` to true if anything changed
-
 	if (rotationDirty) {
 		UpdateRotation();
 		rotationDirty = false;
 	}
 
-	// Todo interpolate / apply move speed
+	// Todo interpolate
 	const auto targetPosition = target->getWorldPosition() + offset;
 	_owner->setLocalPosition(targetPosition);
 }
@@ -38,7 +29,6 @@ void ObjectFollow::SetRotation(glm::vec3 eulerAngles) {
 	rotationDirty = true;
 }
 
-// ReSharper disable once CppMemberFunctionMayBeConst <- Shouldn't be const
 void ObjectFollow::UpdateRotation() {
 	// Get original transform & decompose into translation, rotation, scale
 	const auto transform = _owner->getTransform();
@@ -50,7 +40,7 @@ void ObjectFollow::UpdateRotation() {
 	// Calculate new matrix using original translation & scale, but with new rotation
 	auto matrix = glm::mat4(1.0f);
 	matrix = translate(matrix, translation);
-	matrix = utils::glm::RotateEulerXYZ(matrix, eulerAngles);
+	matrix = utils::glm::RotateEulerXYZDegrees(matrix, eulerAngles);
 	matrix = glm::scale(matrix, scale);
 
 	_owner->setTransform(matrix);

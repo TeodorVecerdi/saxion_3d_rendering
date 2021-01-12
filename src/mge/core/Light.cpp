@@ -33,6 +33,14 @@ void Light::SetLightType(const LightType lightType) {
 	lightData.lightType = lightType;
 }
 
+void Light::SetOuterAngle(float outerAngle) {
+	lightData.outerAngle = glm::cos(outerAngle);
+}
+
+void Light::SetInnerAngle(float innerAngle) {
+	lightData.innerAngle = glm::cos(innerAngle);
+}
+
 LightData Light::GetLightData() const {
 	const auto worldPosition = getWorldPosition();
 	

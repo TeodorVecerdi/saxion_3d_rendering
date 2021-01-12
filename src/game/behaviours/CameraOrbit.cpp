@@ -85,8 +85,8 @@ void CameraOrbit::lateUpdate(const float ts) {
 	///----------------------------------------------------------
 	///				     APPLY TRANSFORMATIONS
 	///----------------------------------------------------------
-	auto translation = translate(currentPosition);
-	auto rotation = glm::toMat4((shenaniganQuatY * yQuat) * (shenaniganQuatX * xQuat)) * translate(-zoomedOffset);
+	auto translation = glm::translate(currentPosition);
+	auto rotation = glm::toMat4((yQuat) * (xQuat)) * translate(-zoomedOffset);
 	auto matrix = translation * rotation;
 
 	_owner->setTransform(matrix);

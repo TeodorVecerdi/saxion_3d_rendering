@@ -15,6 +15,8 @@ struct LightData {
 	glm::vec3 lightDirection;
 	glm::vec3 lightColor;
 	glm::vec3 attenuation; // x = const, y = linear, z = quadratic
+	float innerAngle; // spotlight
+	float outerAngle; // spotlight
 };
 
 /**
@@ -38,6 +40,11 @@ public:
 
 	LightType GetLightType() const { return lightData.lightType; }
 	void SetLightType(LightType lightType);
+
+	float GetOuterAngle() const { return glm::acos(lightData.outerAngle);}
+	void SetOuterAngle(float outerAngle);
+	float GetInnerAngle() const { return glm::acos(lightData.innerAngle);}
+	void SetInnerAngle(float innerAngle);
 
 	LightData GetLightData() const;
 
