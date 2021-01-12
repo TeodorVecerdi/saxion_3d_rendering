@@ -4,9 +4,9 @@
 #include "mge/core/GameObject.hpp"
 
 enum LightType: uint32_t {
-	DIRECTIONAL = 0,
-	POINT = 1,
-	SPOTLIGHT = 2
+	DIRECTIONAL = 1,
+	POINT = 2,
+	SPOTLIGHT = 4
 };
 
 struct LightData {

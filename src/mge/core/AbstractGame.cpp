@@ -21,31 +21,31 @@ AbstractGame::~AbstractGame() {
 }
 
 void AbstractGame::initialize() {
-	std::cout << "Initializing engine..." << std::endl << std::endl;
+	std::cout << "Initializing engine...\n\n";
 	_initializeWindow();
 	_printVersionInfo();
 	_initializeGlew();
 	_initializeRenderer();
 	_initializeWorld();
 	_initializeScene();
-	std::cout << std::endl << "Engine initialized." << std::endl << std::endl;
+	std::cout << "\nEngine initialized.\n\n";
 }
 
 ///SETUP
 
 void AbstractGame::_initializeWindow() {
-	std::cout << "Initializing window..." << std::endl;
+	std::cout << "Initializing window...\n";
 	_window = new sf::RenderWindow(sf::VideoMode(1280, 720), "My Game!", sf::Style::Default, sf::ContextSettings(24, 8, 0, 3, 3));
 	_window->setVerticalSyncEnabled(true);
-	std::cout << "Window initialized." << std::endl << std::endl;
+	std::cout << "Window initialized.\n";
 
 	// Create an input instance
 	_input = new mge::Input(_window);
 }
 
 void AbstractGame::_printVersionInfo() {
-	std::cout << "Context info:" << std::endl;
-	std::cout << "----------------------------------" << std::endl;
+	std::cout << "Context info:\n";
+	std::cout << "----------------------------------\n";
 	//print some debug stats for whoever cares
 	const GLubyte* vendor = glGetString(GL_VENDOR);
 	const GLubyte* renderer = glGetString(GL_RENDERER);
@@ -62,29 +62,29 @@ void AbstractGame::_printVersionInfo() {
 	printf("GL Version (integer) : %d.%d\n", major, minor);
 	printf("GLSL Version : %s\n", glslVersion);
 
-	std::cout << "----------------------------------" << std::endl << std::endl;
+	std::cout << "----------------------------------\n\n";
 }
 
 void AbstractGame::_initializeGlew() {
 	std::cout << "Initializing GLEW..." << std::endl;
 	//initialize the opengl extension wrangler
 	GLint glewStatus = glewInit();
-	std::cout << "Initialized GLEW, status (1 == OK, 0 == FAILED):" << (glewStatus == GLEW_OK) << std::endl << std::endl;
+	std::cout << "Initialized GLEW, status (1 == OK, 0 == FAILED):" << (glewStatus == GLEW_OK) << "\n\n";
 }
 
 void AbstractGame::_initializeRenderer() {
 	//setup our own renderer
-	std::cout << "Initializing renderer..." << std::endl;
+	std::cout << "Initializing renderer...\n";
 	_renderer = new Renderer();
 	_renderer->setClearColor(0, 0, 0);
-	std::cout << "Renderer done." << std::endl << std::endl;
+	std::cout << "Renderer done.\n\n";
 }
 
 void AbstractGame::_initializeWorld() {
 	//setup the world
-	std::cout << "Initializing world..." << std::endl;
+	std::cout << "Initializing world...\n";
 	_world = new World();
-	std::cout << "World initialized." << std::endl << std::endl;
+	std::cout << "World initialized.\n\n";
 }
 
 ///MAIN GAME LOOP

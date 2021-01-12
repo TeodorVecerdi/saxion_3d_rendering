@@ -79,6 +79,7 @@ void MGEGame::_initializeScene() {
 	//each mesh only has to be loaded once, but can be used multiple times:
 	//F is flat shaded, S is smooth shaded (normals aligned or not), check the models folder!
 	Mesh* cubeMeshF = Mesh::load(mge::config::Model("cube_flat.obj"));
+	Mesh* cubeMeshSmooth = Mesh::load(mge::config::Model("cube_smooth.obj"));
 	Mesh* sphereMesh = Mesh::load(mge::config::Model("sphere_flat.obj"));
 	Mesh* sphereSmoothMesh = Mesh::load(mge::config::Model("sphere_smooth.obj"));
 	Mesh* sniperMesh = Mesh::load(game::config::Model("sniper/sniper2.obj"));
@@ -133,12 +134,12 @@ void MGEGame::_initializeScene() {
 
 	GameObject* cubeLeft = new GameObject("cubeLeft", glm::vec3(-2, 0, 0));
 	cubeLeft->scale(glm::vec3(0.75f));
-	cubeLeft->setMesh(cubeMeshF);
+	cubeLeft->setMesh(cubeMeshSmooth);
 	cubeLeft->setMaterial(colorA_Material);
 
 	GameObject* cubeRight = new GameObject("cubeRight", glm::vec3(2, 0, 0));
 	cubeRight->scale(glm::vec3(0.75f));
-	cubeRight->setMesh(cubeMeshF);
+	cubeRight->setMesh(sphereSmoothMesh);
 	cubeRight->setMaterial(colorB_Material);
 	GameObject* cubeForward = new GameObject("cubeForward", glm::vec3(0, 0, 2));
 	cubeForward->scale(glm::vec3(0.75f));
@@ -163,7 +164,7 @@ void MGEGame::_initializeScene() {
 
 	// Light
 	Light* light = new Light("Light");
-	light->SetAttenuation(1, 1, 0);
+	light->SetAttenuation(1, 0.09f, 0.032f);
 	light->SetLightType(LightType::POINT);
 	light->SetDiffuseColor(glm::vec3(1.0f, 1.0f, 1.0f));
 	auto* lightBeh = new SimpleLightBehaviour({0, 5, 0}, 10.0f);
@@ -182,10 +183,10 @@ void MGEGame::_initializeScene() {
 	lightCube->scale(glm::vec3(0.5f));
 	lightCube->setMesh(cubeMeshF);
 	lightCube->setMaterial(colorWhite_Material);
-	// directional->add(lightCube);
-	// _world->add(directional);
-	light->add(lightCube);
-	_world->add(light);
+	directional->add(lightCube);
+	_world->add(directional);
+	// light->add(lightCube);
+	// _world->add(light);
 }
 
 void MGEGame::_render() {

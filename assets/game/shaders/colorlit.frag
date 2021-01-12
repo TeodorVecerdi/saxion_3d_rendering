@@ -17,49 +17,90 @@ layout (location = 11) uniform vec3 lightDirection;
 layout (location = 12) uniform vec3 lightColor;
 layout (location = 13) uniform vec3 attenuation; // x = const, y = linear, z = quadratic
 
-vec3 ambient() {
-    return ambientColor.a * ambientColor.rgb;
+const uint DIRECTIONAL = 1;
+const uint POINT = 2;
+const uint SPOTLIGHT = 4;
+
+vec3 lightWeight() {
+    return vec3((lightType & DIRECTIONAL)/DIRECTIONAL, (lightType & POINT)/POINT, (lightType & SPOTLIGHT)/SPOTLIGHT);
 }
 
-vec3 diffuse(in vec3 norm, out vec3 lightDir) {
-    float lightDistance = distance(lightPosition, fragPosition);
-    float attn; 
-    if(lightType == 0) { // directional
-        lightDir = normalize(-lightDirection);
-        attn = 1;
-    } else if (lightType == 1) {// point
-        attn = attenuation.x + attenuation.y * lightDistance + attenuation.z * lightDistance * lightDistance;
-        lightDir = normalize(lightPosition - fragPosition);
-    } else if (lightType == 2) {// spot, same as directional for now
-        lightDir = normalize(-lightDirection);
-        attn = 1;
-    }
-    
+vec3 pointLight() {
+    vec3 norm = normalize(normal);
+    vec3 AMBIENT = ambientColor.a * ambientColor.rgb;
+    float dist = distance(lightPosition, fragPosition);
+    float distSqr = dist * dist;
+    vec3 lightDir = normalize(lightPosition - fragPosition);
+    float attn = 1.0 / (attenuation.x + attenuation.y * dist + attenuation.z * distSqr);
     float diffuseAmount = max(dot(norm, lightDir), 0.0);
-    // apply attenuation
-    diffuseAmount /= attn;
-    
-    return diffuseAmount * lightColor;
+    vec3 DIFFUSE = diffuseAmount * attn * lightColor;
+    vec3 r = reflect(-lightDir, norm);
+    vec3 v = normalize(eye - fragPosition);
+    float shineFactor = pow(max(dot(r, v), 0), shininess);
+    vec3 SPECULAR = specularColor.a * attn * shineFactor * lightColor * specularColor.rgb;
+    return (AMBIENT + DIFFUSE + SPECULAR);
 }
 
-vec3 specular(in vec3 norm, in vec3 lightDir) {
-    vec3 R = reflect(-lightDir, norm);
-    vec3 V = normalize(eye - fragPosition);
-    return specularColor.a * pow(max(dot(R, V), 0), shininess) * lightColor * specularColor.rgb;
+vec3 spotlight() {
+    return vec3(1);
 }
+
+vec3 directionalLight() {
+    vec3 norm = normalize(normal);
+    vec3 AMBIENT = ambientColor.a * ambientColor.rgb;
+    float dist = distance(lightPosition, fragPosition);
+    float distSqr = dist * dist;
+    vec3 lightDir = normalize(-lightDirection);
+    float diffuseAmount = max(dot(norm, lightDir), 0.0);
+    vec3 DIFFUSE = diffuseAmount * lightColor;
+    vec3 r = reflect(-lightDir, norm);
+    vec3 v = normalize(eye - fragPosition);
+    float shineFactor = pow(max(dot(r, v), 0), shininess);
+    vec3 SPECULAR = specularColor.a * shineFactor * lightColor * specularColor.rgb;
+    return (AMBIENT + DIFFUSE + SPECULAR);
+}
+/**
+const uint MAX_P_LIGHTS = 100;
+const uint MAX_S_LIGHTS = 100;
+
+struct DLightData {
+    float data; //... whatever, with default values
+} dLight;
+
+struct PLightData {
+    float data; //... whatever, with default values
+} pLights[MAX_P_LIGHTS];
+
+struct SLightData {
+    float data; //... whatever, with default values
+} sLights[MAX_S_LIGHTS];
+
+uniform uint pLightCount;
+uniform uint sLightCount;
+uniform uint dLightCount; // 0 or 1, used as a 'weight' of sorts
+*/
 
 void main() {
-    vec3 norm = normalize(normal);
-    vec3 lightDir;
-
-    /// ambient
-    vec3 ambientFactor = ambient();
+    vec3 weights = lightWeight();
     
-    /// diffuse
-    vec3 diffuseFactor = diffuse(norm, lightDir);
+    vec3 directionalVal = directionalLight() * weights.x;
+    vec3 pointVal = pointLight() * weights.y;
+    vec3 spotlightVal = spotlight() * weights.z;
 
-    /// specular
-    vec3 specularFactor = specular(norm, lightDir);
+    /** 
+    vec3 pLighting = vec3(0);
+    for(int i = 0; i < pLightCount; i++) {
+        pLighting += pointLight(pLights[i]);
 
-    gl_FragColor = vec4((ambientFactor + diffuseFactor + specularFactor) * objectColor, 1);
+    vec3 sLighting = vec3(0);
+    for(int i = 0; i < sLightCount; i++) {
+        sLighting += spotlight(sLights[i]);
+    }
+
+    vec3 dLighting = dLightCount * directionalLight(dLight);
+    
+    vec3 ligthing = pLighting + sLighting + dLighting;
+    */
+
+    gl_FragColor = vec4((directionalVal + pointVal + spotlightVal) * objectColor, 1);
 }

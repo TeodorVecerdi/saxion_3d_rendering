@@ -5,13 +5,12 @@
 #include <SFML/Window/Mouse.hpp>
 
 #include "game/utils/constants.hpp"
-#include "game/utils/glm_utils.hpp"
 #include "game/utils/math_utils.hpp"
 #include "mge/core/GameObject.hpp"
 #include "mge/util/Input.hpp"
 
-CameraOrbit::CameraOrbit(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles, float orbitSpeed, float mouseSensitivity, float scrollSensitivity) : target(target),
-	currentPosition(0), offset(offset), orbitSpeed(orbitSpeed), mouseSensitivity(mouseSensitivity), scrollSensitivity(scrollSensitivity), zoomRange(-2, -20) {
+CameraOrbit::CameraOrbit(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles, float orbitSpeed, float mouseSensitivity, float scrollSensitivity) :
+target(target), currentPosition(0), offset(offset), orbitSpeed(orbitSpeed), mouseSensitivity(mouseSensitivity), scrollSensitivity(scrollSensitivity), zoomRange(-2, -20) {
 
 	targetAngleY = utils::constants::degToRad * eulerAngles.y;
 	targetAngleX = utils::constants::degToRad * eulerAngles.x;
