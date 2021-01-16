@@ -9,7 +9,7 @@ LightRotatingBehaviour::LightRotatingBehaviour(const float speed, const glm::vec
 	currentRotation = 0;
 }
 
-void LightRotatingBehaviour::update(const float pStep) {
+void LightRotatingBehaviour::Update(const float pStep) {
 	currentRotation += speed * pStep;
 
 	Light* ownerLight = dynamic_cast<Light*>(_owner);
@@ -20,7 +20,7 @@ void LightRotatingBehaviour::update(const float pStep) {
 	glm::quat rotation = yQuat * xQuat * zQuat;
 	glm::vec3 direction = glm::normalize(rotation * utils::constants::forward);
 
-	glm::mat4 matrix = _owner->getTransform();
+	glm::mat4 matrix = _owner->GetTransform();
 	glm::vec3 trans;
 	glm::vec3 scale;
 	glm::quat rot;
@@ -29,7 +29,7 @@ void LightRotatingBehaviour::update(const float pStep) {
 
 	glm::mat4 newMatrix = utils::constants::identity;
 	newMatrix = glm::translate(trans) * glm::toMat4(rotation) * glm::scale(scale);
-	_owner->setTransform(newMatrix);
+	_owner->SetTransform(newMatrix);
 	
 	ownerLight->SetDirection(direction);
 }

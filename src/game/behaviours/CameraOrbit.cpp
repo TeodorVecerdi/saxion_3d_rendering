@@ -29,9 +29,9 @@ CameraOrbit::~CameraOrbit() {
 	mge::Input::SetMouseLock(false);
 }
 
-void CameraOrbit::lateUpdate(const float ts) {
-	const auto targetPosition = target->getWorldPosition();
-	const auto selfPosition = _owner->getWorldPosition();
+void CameraOrbit::LateUpdate(const float ts) {
+	const auto targetPosition = target->GetWorldPosition();
+	const auto selfPosition = _owner->GetWorldPosition();
 	UpdateInput(ts);
 
 	///----------------------------------------------------------
@@ -64,32 +64,13 @@ void CameraOrbit::lateUpdate(const float ts) {
 	const auto yQuat = glm::angleAxis(currentAngleY, utils::constants::up);
 
 	///----------------------------------------------------------
-	///						 SHENANIGANS
-	///----------------------------------------------------------
-	auto shenaniganQuatY = glm::quat_identity<float, glm::defaultp>();
-	auto shenaniganQuatX = glm::quat_identity<float, glm::defaultp>();
-
-	if constexpr (false) {
-		const auto shenanigan1 = currentPosition - targetPosition;
-		const auto shenanigan2 = -10.0f * shenanigan1.x * utils::constants::degToRad; // heading
-		const auto shenanigan3 = shenanigan1.z * utils::constants::degToRad;          // pitch
-
-		shenaniganQuatY = glm::angleAxis(shenanigan2, utils::constants::up);
-		shenaniganQuatX = glm::angleAxis(shenanigan3, utils::constants::right);
-		if (utils::math::Approx(shenanigan1.x, 0.0, 0.01))
-			shenaniganQuatY = glm::quat_identity<float, glm::defaultp>();
-		if (utils::math::Approx(shenanigan1.z, 0.0, 0.01))
-			shenaniganQuatX = glm::quat_identity<float, glm::defaultp>();
-	}
-
-	///----------------------------------------------------------
 	///				     APPLY TRANSFORMATIONS
 	///----------------------------------------------------------
 	auto translation = glm::translate(currentPosition);
-	auto rotation = glm::toMat4((yQuat) * (xQuat)) * translate(-zoomedOffset);
+	auto rotation = glm::toMat4(yQuat * xQuat) * glm::translate(-zoomedOffset);
 	auto matrix = translation * rotation;
 
-	_owner->setTransform(matrix);
+	_owner->SetTransform(matrix);
 }
 
 void CameraOrbit::UpdateInput(const float ts) {

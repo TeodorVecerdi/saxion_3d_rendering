@@ -59,7 +59,7 @@ void LitColorMaterial::SetShininess(float shininess) {
 void LitColorMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
 	_shader->use();
 
-	eye = world->getMainCamera()->getWorldPosition();
+	eye = world->getMainCamera()->GetWorldPosition();
 
 	const size_t lightCount = std::min(world->getLightCount(), LitColorMaterial::MAX_LIGHTS);
 	for (size_t i = 0; i < lightCount; i++) {

@@ -12,7 +12,7 @@ class KeysBehaviour : public AbstractBehaviour
 	    //move speed is in units per second, turnspeed in degrees per second
 		KeysBehaviour(float pMoveSpeed = 5, float pTurnSpeed = 45);
 		virtual ~KeysBehaviour();
-		virtual void update( float pStep );
+		virtual void Update( float pStep );
 
     private:
         float _moveSpeed;

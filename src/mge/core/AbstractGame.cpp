@@ -102,6 +102,8 @@ void AbstractGame::run() {
 	mge::Input::OnViewportResized(windowSize.x, windowSize.y);
 	mge::Input::ResetAll(mousePos.x, mousePos.y);
 
+	_world->Start();
+
 	while (_window->isOpen()) {
 		const auto deltaTime = updateClock.restart().asSeconds();
 		mge::Time::Update(deltaTime);
@@ -133,8 +135,8 @@ void AbstractGame::run() {
 }
 
 void AbstractGame::_update(float pStep) {
-	_world->update(pStep);
-	_world->lateUpdate(pStep);
+	_world->Update(pStep);
+	_world->LateUpdate(pStep);
 }
 
 void AbstractGame::_render() {

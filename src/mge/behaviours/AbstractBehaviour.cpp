@@ -7,7 +7,7 @@ AbstractBehaviour::~AbstractBehaviour()
 	_owner = nullptr;
 }
 
-void AbstractBehaviour::setOwner (GameObject* pOwner) {
+void AbstractBehaviour::SetOwner (GameObject* pOwner) {
     _owner = pOwner;
 }
 

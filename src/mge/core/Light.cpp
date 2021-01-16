@@ -52,7 +52,7 @@ void Light::SetInnerAngle(float innerAngle) {
 }
 
 LightData Light::GetLightData() const {
-	const auto worldPosition = getWorldPosition();
+	const auto worldPosition = GetWorldPosition();
 	
 	auto copyLightData = lightData;
 	copyLightData.position = worldPosition;

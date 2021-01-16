@@ -6,7 +6,7 @@
 class LightRotatingBehaviour: public AbstractBehaviour {
 public:
 	LightRotatingBehaviour(float speed, glm::vec3 angleOffset);
-	void update(float pStep) override;
+	void Update(float pStep) override;
 private:
 	float speed;
 	float currentRotation;

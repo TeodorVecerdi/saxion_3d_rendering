@@ -1,9 +1,10 @@
 #include "glm.hpp"
 
-#include "LitTextureMaterial.hpp"
+#include "TerrainMaterial.hpp"
 
 #include "game/config.hpp"
 #include "game/utils/constants.hpp"
+#include "game/utils/gl_utils.hpp"
 #include "game/utils/math_utils.hpp"
 #include "game/utils/string_utils.hpp"
 #include "mge/core/Camera.hpp"
@@ -13,57 +14,63 @@
 #include "mge/core/Texture.hpp"
 #include "mge/core/World.hpp"
 
-ShaderProgram* LitTextureMaterial::_shader = NULL;
+ShaderProgram* TerrainMaterial::_shader = NULL;
 
-LitTextureMaterial::LitTextureMaterial(Texture* texture): texture(texture), ambientColor(1,1,1,0.1f), specularColor(1,1,1,0.5f), shininess(256), eye(0) {
+TerrainMaterial::TerrainMaterial(Texture* heightmap, Texture* splatmap, const float height, const float normalStepSize): heightmap(heightmap), splatmap(splatmap), height(height), normalStepSize(normalStepSize), ambientColor(1,1,1,0.1f), specularColor(1,1,1,0.5f), shininess(256), eye(0) {
 	//every time we create an instance of colormaterial we check if the corresponding shader has already been loaded
 	_lazyInitializeShader();
 }
 
-void LitTextureMaterial::_lazyInitializeShader() {
+void TerrainMaterial::_lazyInitializeShader() {
 	//this shader contains everything the material can do (it can render something in 3d using a single color)
 	if (!_shader) {
 		_shader = new ShaderProgram();
-		_shader->addShader(GL_VERTEX_SHADER, game::config::Shader("texturelit.vert"));
-		_shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("texturelit_multiple.frag"));
+		_shader->addShader(GL_VERTEX_SHADER, game::config::Shader("terrain.vert"));
+		_shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("terrain.frag"));
 		_shader->finalize();
 	}
 }
 
-LitTextureMaterial::~LitTextureMaterial() {
-	//dtor
+void TerrainMaterial::SetHeightmap(Texture* heightmap) {
+	this->heightmap = heightmap;
 }
 
-void LitTextureMaterial::SetTexture(Texture* texture) {
-	this->texture = texture;
+void TerrainMaterial::SetSplatmap(Texture* splatmap) {
+	this->splatmap = splatmap;
 }
 
-void LitTextureMaterial::SetAmbientColor(glm::vec3 ambientColor) {
+void TerrainMaterial::SetAmbientColor(glm::vec3 ambientColor) {
 	this->ambientColor = glm::vec4(ambientColor, this->ambientColor.w);
 }
 
-void LitTextureMaterial::SetAmbientIntensity(float intensity) {
+void TerrainMaterial::SetAmbientIntensity(float intensity) {
 	ambientColor.w = intensity;
 }
 
-void LitTextureMaterial::SetSpecularColor(glm::vec3 specularColor) {
+void TerrainMaterial::SetSpecularColor(glm::vec3 specularColor) {
 	this->specularColor = glm::vec4(specularColor, this->specularColor.w);
 }
 
-void LitTextureMaterial::SetSpecularIntensity(float intensity) {
+void TerrainMaterial::SetSpecularIntensity(float intensity) {
 	specularColor.w = intensity;
 }
 
-void LitTextureMaterial::SetShininess(float shininess) {
+void TerrainMaterial::SetShininess(float shininess) {
 	this->shininess = shininess;
 }
+void TerrainMaterial::SetHeight(float height) {
+	this->height = height;
+}
+void TerrainMaterial::SetNormalStepSize(float normalStepSize) {
+	this->normalStepSize = normalStepSize;
+}
 
-void LitTextureMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
 	_shader->use();
 
 	eye = world->getMainCamera()->GetWorldPosition();
 
-	const size_t lightCount = std::min(world->getLightCount(), LitTextureMaterial::MAX_LIGHTS);
+	const size_t lightCount = std::min(world->getLightCount(), TerrainMaterial::MAX_LIGHTS);
 	for(size_t i = 0; i < lightCount; i++) {
 		const LightData ld = world->getLightAt(i)->GetLightData();
 		const std::string lStr = utils::str::string_format("lights[%u]", i);
@@ -81,17 +88,15 @@ void LitTextureMaterial::render(World* world, Mesh* mesh, const glm::mat4& model
 
 	glUniform4fv(_shader->getUniformLocation("material.specular"), 1, glm::value_ptr(specularColor));
 	glUniform1f(_shader->getUniformLocation("material.shininess"), shininess);
+	glUniform1f(_shader->getUniformLocation("terrainVert.height"), height);
+	glUniform1f(_shader->getUniformLocation("terrainVert.normalStepSize"), normalStepSize);
 
 
 	// Base
-	//setup texture slot 0
-	glActiveTexture(GL_TEXTURE0);
-	//bind the texture to the current active slot
-	glBindTexture(GL_TEXTURE_2D, texture->getId());
-	//tell the shader the texture slot for the diffuse texture is slot 0
-	glUniform1i(_shader->getUniformLocation("material.diffuse"), 0);
+	utils::gl::PassTexture(_shader, "terrainVert.heightmap", 0, heightmap->getId());
+	utils::gl::PassTexture(_shader, "terrainFrag.splatmap", 1, splatmap->getId());
 	
-	glUniform3fv(3, 1, glm::value_ptr(eye));
+	glUniform3fv(_shader->getUniformLocation("eye"), 1, glm::value_ptr(eye));
 	
 
 	//pass in all MVP matrices separately

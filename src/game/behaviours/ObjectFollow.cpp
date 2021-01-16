@@ -11,7 +11,7 @@ ObjectFollow::ObjectFollow(GameObject* target, const glm::vec3 offset, const glm
 ObjectFollow::~ObjectFollow() {
 }
 
-void ObjectFollow::update(float ts) {
+void ObjectFollow::Update(float ts) {
 	if (target == nullptr) return;
 
 	if (rotationDirty) {
@@ -20,8 +20,8 @@ void ObjectFollow::update(float ts) {
 	}
 
 	// Todo interpolate
-	const auto targetPosition = target->getWorldPosition() + offset;
-	_owner->setLocalPosition(targetPosition);
+	const auto targetPosition = target->GetWorldPosition() + offset;
+	_owner->SetLocalPosition(targetPosition);
 }
 
 void ObjectFollow::SetRotation(glm::vec3 eulerAngles) {
@@ -31,7 +31,7 @@ void ObjectFollow::SetRotation(glm::vec3 eulerAngles) {
 
 void ObjectFollow::UpdateRotation() {
 	// Get original transform & decompose into translation, rotation, scale
-	const auto transform = _owner->getTransform();
+	const auto transform = _owner->GetTransform();
 	glm::vec3 translation;
 	glm::quat rotation;
 	glm::vec3 scale;
@@ -43,7 +43,7 @@ void ObjectFollow::UpdateRotation() {
 	matrix = utils::glm::RotateEulerXYZDegrees(matrix, eulerAngles);
 	matrix = glm::scale(matrix, scale);
 
-	_owner->setTransform(matrix);
+	_owner->SetTransform(matrix);
 }
 
 /*void ObjectFollow::UpdateOrbit(float ts) {

@@ -8,7 +8,7 @@ class CameraOrbit: public AbstractBehaviour{
 public:
 	CameraOrbit(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles = glm::vec3(0), float orbitSpeed = 45.0f, float mouseSensitivity = 0.1f, float scrollSensitivity = 100.0f);
 	virtual ~CameraOrbit();
-	void lateUpdate(float ts) override;
+	void LateUpdate(float ts) override;
 
 private:
 	void UpdateInput(float ts);

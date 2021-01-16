@@ -6,7 +6,7 @@ class ObjectFollow : public AbstractBehaviour {
 public:
 	ObjectFollow(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles, float orbitSpeed = 30.0f);
 	virtual ~ObjectFollow();
-	void update(float ts) override;
+	void Update(float ts) override;
 
 	void SetTarget(GameObject* target) { this->target = target; }
 	GameObject* GetTarget() const { return target; }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+
 #include "mge/behaviours/AbstractBehaviour.hpp"
 
 /**
@@ -8,9 +10,11 @@
 class RotatingBehaviour : public AbstractBehaviour
 {
 	public:
+		RotatingBehaviour(float speed, glm::vec3 axis);
 		RotatingBehaviour();
-		virtual ~RotatingBehaviour();
 
-		virtual void update(float pStep);
-
+		void Update(float pStep) override;
+private:
+	float speed;
+	glm::vec3 axis;
 };

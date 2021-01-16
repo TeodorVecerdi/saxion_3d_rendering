@@ -42,28 +42,28 @@ void Renderer::render(World* pWorld) {
 
 void Renderer::render(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, Camera* pCamera, bool pRecursive)
 {
-	render(pWorld, pGameObject, pMaterial, pGameObject->getWorldTransform(), glm::inverse(pCamera->getWorldTransform()), pCamera->getProjection(), pRecursive);
+	render(pWorld, pGameObject, pMaterial, pGameObject->GetWorldTransform(), glm::inverse(pCamera->GetWorldTransform()), pCamera->getProjection(), pRecursive);
 }
 
 void Renderer::render(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix, bool pRecursive) {
-	renderSelf(pWorld, pGameObject, pMaterial == nullptr?pGameObject->getMaterial():pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix);
+	renderSelf(pWorld, pGameObject, pMaterial == nullptr?pGameObject->GetMaterial():pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix);
 	if (pRecursive) renderChildren(pWorld, pGameObject, pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix, pRecursive);
 }
 
 void Renderer::renderSelf(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
-	render(pWorld, pGameObject->getMesh(), pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix);
-	if (debug) renderMeshDebugInfo(pGameObject->getMesh(), pModelMatrix, pViewMatrix, pProjectionMatrix);
+	render(pWorld, pGameObject->GetMesh(), pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix);
+	if (debug) renderMeshDebugInfo(pGameObject->GetMesh(), pModelMatrix, pViewMatrix, pProjectionMatrix);
 }
 
 void Renderer::renderChildren(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix, bool pRecursive) {
-	int childCount = pGameObject->getChildCount();
+	int childCount = pGameObject->GetChildCount();
 	if (childCount < 1) return;
 
 	//note that with a loop like this, deleting children during rendering is not a good idea :)
 	GameObject* child = 0;
 	for (int i = 0; i < childCount; i++) {
-		child = pGameObject->getChildAt(i);
-		render(pWorld, child, pMaterial, pModelMatrix * child->getTransform(), pViewMatrix, pProjectionMatrix, pRecursive);
+		child = pGameObject->GetChildAt(i);
+		render(pWorld, child, pMaterial, pModelMatrix * child->GetTransform(), pViewMatrix, pProjectionMatrix, pRecursive);
 	}
 }
 

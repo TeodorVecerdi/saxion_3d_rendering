@@ -6,7 +6,7 @@
 class SimpleLightBehaviour : public AbstractBehaviour {
 public:
 	SimpleLightBehaviour(const glm::vec3& offset, float magnitude);
-	void update(float ts) override;
+	void Update(float ts) override;
 private:
 	glm::vec3 offset;
 	float magnitude;

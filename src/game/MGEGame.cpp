@@ -28,7 +28,9 @@
 #include "behaviours/SimpleLightBehaviour2.h"
 #include "materials/LitColorMaterial.hpp"
 #include "materials/LitTextureMaterial.hpp"
+#include "materials/TerrainMaterial.hpp"
 #include "materials/WobbleTextureMaterial.hpp"
+#include "mge/behaviours/RotatingBehaviour.hpp"
 #include "mge/core/Light.hpp"
 #include "utils/constants.hpp"
 
@@ -86,147 +88,132 @@ void MGEGame::_initializeScene() {
 	Mesh* sphereSmoothMesh = Mesh::load(mge::config::Model("sphere_smooth.obj"));
 	Mesh* coneMesh = Mesh::load(game::config::Model("traffic_cone/model.obj"));
 	Mesh* cylMesh = Mesh::load(mge::config::Model("cylinder_smooth.obj"));
-	Mesh* sniperMesh = Mesh::load(game::config::Model("sniper/sniper2.obj"));
-	Mesh* planeMeshDefault = Mesh::load(mge::config::Model("plane.obj"));
+	Mesh* terrainMesh = Mesh::load(mge::config::Model("plane_8192.obj"));
 
 	//MATERIALS
-	AbstractMaterial* colorA_Material = new LitColorMaterial(glm::vec3(233.0f, 196.0f, 106.0f) / 255.0f);
 	AbstractMaterial* lightMaterial = new TextureMaterial(Texture::load(mge::config::Texture("bricks.jpg")));
-	AbstractMaterial* colorB_Material = new LitColorMaterial(glm::vec3(42.0f, 157.0f, 143.0f) / 255.0f);
 	LitColorMaterial* litMaterial = new LitColorMaterial(glm::vec3(0xba) / 255.0f);
 	litMaterial->SetAmbientIntensity(0.1f);
-	LitColorMaterial* sphereMat = new LitColorMaterial(glm::vec3(0xff, 0x25, 0x5a) / 255.0f);
-	sphereMat->SetShininess(32.0f);
-	sphereMat->SetSpecularIntensity(1.0f);
-	sphereMat->SetAmbientIntensity(0.1f);
 
-	LitTextureMaterial* runicStoneMaterial = new LitTextureMaterial(Texture::load(mge::config::Texture("runicfloor.png")));
+	// mesh size / mesh vertices (on one side)
+	const float vertexDistance = 2.0f / 65.0f;
+	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(mge::config::Texture("terrain/heightmap.png")),
+	                                                        Texture::load(mge::config::Texture("terrain/splatmap.png")),
+		                                                        0.25, vertexDistance);
+		terrainMaterial->SetAmbientIntensity(0.1);
+		terrainMaterial->SetShininess(1024);
+		terrainMaterial->SetSpecularIntensity(0.0f);
+
+		LitTextureMaterial* trafficConeMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("traffic_cone/diffuse.png")));
+	trafficConeMaterial->SetAmbientIntensity(0.1f);
 	AbstractMaterial* bricks_Material = new WobbleTextureMaterial(Texture::load(mge::config::Texture("bricks.jpg")));
-	LitTextureMaterial* sniperMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("sniper/sniper-color.jpg")));
-	TextureMaterial* trafficConeMaterial = new TextureMaterial(Texture::load(game::config::Texture("traffic_cone/diffuse.png")));
+
 
 	//SCENE SETUP
-	GameObject* plane = new GameObject("plane", glm::vec3(0, -5, 0));
-	plane->scale(glm::vec3(100, 0.01f, 100));
-	plane->setMesh(planeMeshDefault);
-	plane->setMaterial(runicStoneMaterial);
-	_world->add(plane);
+	GameObject* terrain = new GameObject("Terrain", utils::constants::zero);
+	terrain->SetMaterial(terrainMaterial);
+	terrain->SetMesh(terrainMesh);
+	terrain->Scale(glm::vec3(100));
+	//RotatingBehaviour* terrainBehaviour = new RotatingBehaviour(15, utils::constants::up);
+	//terrain->SetBehaviour(terrainBehaviour);
+	_world->AddChild(terrain);
+	
 
 	//add camera first (it will be updated last)
 	Camera* camera = new Camera("camera", glm::vec3(0, 2, -10));
+	camera->Rotate(-utils::constants::deg30, utils::constants::right);
+	// camera->SetBehaviour(new RotatingBehaviour());
 	_world->setMainCamera(camera);
-	_world->add(camera);
-
-	//add a spinning sphere
-	GameObject* sniper = new GameObject("sniper", glm::vec3(0, 0, 0));
-	sniper->rotate(glm::radians(-90.0f), glm::vec3(0, 1, 0));
-	sniper->scale(glm::vec3(.75, .75, .75));
-	sniper->setLocalPosition(glm::vec3(0, 1.5, 0));
-	sniper->setMesh(sniperMesh);
-	sniper->setMaterial(sniperMaterial);
-
-	//add a light. Note that the light does ABSOLUTELY ZIP! NADA ! NOTHING !
-	//It's here as a place holder to get you started.
-	//Note how the texture material is able to detect the number of lights in the scene
-	//even though it doesn't implement any lighting yet!
+	_world->AddChild(camera);
 
 	GameObject* mainSphere = new GameObject("mainSphere", glm::vec3(0, 4, 0));
-	mainSphere->scale(glm::vec3(1.f, 1.f, 1.f));
-	mainSphere->setMesh(sphereSmoothMesh);
-	mainSphere->setMaterial(bricks_Material);
-	mainSphere->setBehaviour(new KeysBehaviour(20, 120));
-	_world->add(mainSphere);
+	mainSphere->Scale(glm::vec3(1.f, 1.f, 1.f));
+	mainSphere->SetMesh(sphereSmoothMesh);
+	mainSphere->SetMaterial(bricks_Material);
+	mainSphere->SetBehaviour(new KeysBehaviour(20, 120));
+	_world->AddChild(mainSphere);
 
 	GameObject* cubeLeft = new GameObject("cubeLeft", glm::vec3(-2, 0, 0));
-	cubeLeft->scale(glm::vec3(0.75f));
-	cubeLeft->setMesh(cubeMeshSmooth);
-	cubeLeft->setMaterial(colorA_Material);
+	cubeLeft->Scale(glm::vec3(0.75f));
+	cubeLeft->SetMesh(cubeMeshSmooth);
+	cubeLeft->SetMaterial(litMaterial);
 
 	GameObject* cubeRight = new GameObject("cubeRight", glm::vec3(2, 0, 0));
-	cubeRight->scale(glm::vec3(0.75f));
-	cubeRight->setMesh(sphereSmoothMesh);
-	cubeRight->setMaterial(colorB_Material);
+	cubeRight->Scale(glm::vec3(0.75f));
+	cubeRight->SetMesh(sphereSmoothMesh);
+	cubeRight->SetMaterial(litMaterial);
 	GameObject* cubeForward = new GameObject("cubeForward", glm::vec3(0, 0, 2));
-	cubeForward->scale(glm::vec3(0.75f));
-	cubeForward->setMesh(cubeMeshF);
-	cubeForward->setMaterial(litMaterial);
+	cubeForward->Scale(glm::vec3(0.75f));
+	cubeForward->SetMesh(cubeMeshF);
+	cubeForward->SetMaterial(litMaterial);
 
-	GameObject* bigSphere = new GameObject("bigSphere", glm::vec3(0, 2, 0));
-	bigSphere->scale(glm::vec3(3.0f));
-	bigSphere->setMesh(sphereSmoothMesh);
-	bigSphere->setMaterial(runicStoneMaterial);
-	_world->add(bigSphere);
-
-	mainSphere->add(sniper);
-	mainSphere->add(cubeLeft);
-	mainSphere->add(cubeRight);
-	mainSphere->add(cubeForward);
+	mainSphere->AddChild(cubeLeft);
+	mainSphere->AddChild(cubeRight);
+	mainSphere->AddChild(cubeForward);
 
 	// auto* objectFollow = new ObjectFollow(mainSphere, glm::vec3(0, 6, -6), glm::vec3(-45, -180, 0));
 	// camera->setBehaviour(objectFollow);
 	auto* cameraOrbit = new CameraOrbit(mainSphere, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
-	camera->setBehaviour(cameraOrbit);
+	camera->SetBehaviour(cameraOrbit);
 
 	// Light
 	Light* light = new Light("Light");
-	light->SetAttenuation(1, 0.03f, 0.024f);
+	light->SetAttenuation(1, 0.007f, 0.0004f);
 	light->SetLightType(LightType::POINT);
-	light->SetDiffuseColor(glm::vec3(237, 89, 59)/255.0f);
-	light->SetAmbientColor(glm::vec4(glm::vec3(139, 237, 59)/255.0f, 0.175f));
-	light->SetSpecularColor(glm::vec3(163, 13, 222)/255.0f);
+	light->SetDiffuseColor(glm::vec3(255) / 255.0f);
+	light->SetAmbientColor(glm::vec4(glm::vec3(255) / 255.0f, 0.175f));
+	light->SetSpecularColor(glm::vec3(163, 13, 222) / 255.0f);
 	auto* lightBeh = new SimpleLightBehaviour({0, 5, 0}, 10.0f);
-	light->setBehaviour(lightBeh);
+	light->SetBehaviour(lightBeh);
 
 	Light* spotlight = new Light("Spotlight Light");
-	spotlight->SetAttenuation(1, 0.007, 0.0002);
+	spotlight->SetAttenuation(1.0f, 0.007f, 0.0002f);
 	spotlight->SetLightType(LightType::SPOTLIGHT);
-	spotlight->SetDiffuseColor(2*glm::vec3(158, 237, 31)/255.0f);
-	spotlight->SetAmbientColor(glm::vec4(1,1,1,0.1f));
-	spotlight->SetSpecularColor(glm::vec3(11, 214, 55)/255.0f);
+	spotlight->SetDiffuseColor(2 * glm::vec3(158, 237, 31) / 255.0f);
+	spotlight->SetAmbientColor(glm::vec4(1, 1, 1, 0.1f));
+	spotlight->SetSpecularColor(glm::vec3(11, 214, 55) / 255.0f);
 	spotlight->SetDirection(glm::vec3(0, -1, 0));
 	spotlight->SetOuterAngle(utils::constants::oneDeg * 17.5f);
 	spotlight->SetInnerAngle(utils::constants::oneDeg * 12.5f);
-	auto* lightBeh2 = new SimpleLightBehaviour2({0, 10, 0}, 7.0f);
-	spotlight->setBehaviour(lightBeh2);
+	auto* lightBeh2 = new SimpleLightBehaviour2({0, 20, 0}, 7.0f);
+	spotlight->SetBehaviour(lightBeh2);
 
 	Light* directional = new Light("Directional Light", {0, 10, 0});
-	const glm::vec3 lightDirection = glm::quat(glm::vec3(45, 45, 0) * utils::constants::degToRad) * utils::constants::forward;
+	const glm::vec3 lightDirection = glm::quat(glm::vec3(30, 45, 0) * utils::constants::degToRad) * utils::constants::forward;
 	directional->SetDirection(glm::normalize(lightDirection));
-	directional->rotate(utils::constants::deg45, utils::constants::up);
-	directional->rotate(utils::constants::deg45, utils::constants::right);
+	directional->Rotate(utils::constants::deg45, utils::constants::up);
+	directional->Rotate(utils::constants::deg30, utils::constants::right);
 	directional->SetAttenuation(1, 0.0f, 0.0f);
 	directional->SetLightType(LightType::DIRECTIONAL);
-	directional->SetOuterAngle(utils::constants::oneDeg * 17.5f);
-	directional->SetInnerAngle(utils::constants::oneDeg * 12.5f);
-	directional->SetDiffuseColor(glm::vec3(1.0f, 1.0f, 1.0f));
+	directional->SetDiffuseColor(0.8*glm::vec3(1.0f, 1.0f, 1.0f));
 	directional->SetAmbientColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f));
-	directional->SetSpecularColor(glm::vec3(210, 250, 248)/255.0f);
-	auto* lightBeh3 = new LightRotatingBehaviour(utils::constants::deg45, {45, 0, 0});
-	directional->setBehaviour(lightBeh3);
+	directional->SetSpecularColor(glm::vec3(210, 250, 248) / 255.0f);
+	auto* lightBeh3 = new LightRotatingBehaviour(utils::constants::deg45, {30, 0, 0});
+	directional->SetBehaviour(lightBeh3);
 
 	GameObject* lightCube = new GameObject("lightCube", glm::vec3(0, 0, 0));
-	lightCube->rotate(-utils::constants::deg90, utils::constants::right);
-	lightCube->scale(glm::vec3(0.5f));
-	lightCube->setMesh(cylMesh);
-	lightCube->setMaterial(lightMaterial);
-	
-	directional->add(lightCube);
-	_world->add(directional);
+	lightCube->Rotate(-utils::constants::deg90, utils::constants::right);
+	lightCube->Scale(glm::vec3(0.5f));
+	lightCube->SetMesh(cylMesh);
+	lightCube->SetMaterial(lightMaterial);
+
+	directional->AddChild(lightCube);
+	_world->AddChild(directional);
 
 	GameObject* lightCube2 = new GameObject("2", glm::vec3(0, 0, 0));
-	lightCube2->scale(glm::vec3(0.5f));
-	lightCube2->setMesh(sphereSmoothMesh);
-	lightCube2->setMaterial(lightMaterial);
-	
-	light->add(lightCube2);
-	_world->add(light);
+	lightCube2->Scale(glm::vec3(0.5f));
+	lightCube2->SetMesh(sphereSmoothMesh);
+	lightCube2->SetMaterial(lightMaterial);
+
+	light->AddChild(lightCube2);
+	//_world->AddChild(light);
 
 	GameObject* lightCube3 = new GameObject("3", glm::vec3(0, 0, 0));
-	lightCube3->scale(0.25*utils::constants::one);
-	lightCube3->setMesh(coneMesh);
-	lightCube3->setMaterial(trafficConeMaterial);
-	spotlight->add(lightCube3);
-	_world->add(spotlight);
+	lightCube3->Scale(0.25 * utils::constants::one);
+	lightCube3->SetMesh(coneMesh);
+	lightCube3->SetMaterial(trafficConeMaterial);
+	spotlight->AddChild(lightCube3);
+	//_world->AddChild(spotlight);
 }
 
 void MGEGame::_render() {
