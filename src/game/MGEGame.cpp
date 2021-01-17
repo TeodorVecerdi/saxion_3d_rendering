@@ -50,34 +50,6 @@ void MGEGame::initialize() {
 
 //build the game _world
 void MGEGame::_initializeScene() {
-	// -----------------------------------------
-	//		          SPLAT MAP
-	// -----------------------------------------
-
-	/*                         /->   1-(r+g+b+a) = baseTex
-	*                        \/
-	* inputs => splatMap, baseTex, redTex, greenTex, blueTex, alphaTex
-	* rgba = sampleTexture(splatMap, uv)
-	* finalColor = mix using channels + textures
-	* gl_FragColor = finalColor
-	*
-	*
-	*
-	*
-	*	    TERRAIN UV COORDINATES
-	*	    
-	*      				    (1,1)
-	*       -----------------
-	*       |               |
-	*       |               |
-	*       |    terrain    |
-	*       |      mesh     |
-	*       |               |
-	*       |               |
-	*       -----------------
-	* (0,0)
-	*/
-
 	//MESHES
 
 	//load a bunch of meshes we will be using throughout this demo
@@ -96,19 +68,19 @@ void MGEGame::_initializeScene() {
 	litMaterial->SetAmbientIntensity(0.1f);
 
 	// mesh size / mesh vertices (on one side)
-	const float vertexDistance = 2.0f / 65.0f;
+	const float vertexDistance = 2.0f / 64.0f;
 	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(game::config::Texture("terrain/heightmap.png"), Texture::UV_WRAP::CLAMP),
-	                                                       Texture::load(game::config::Texture("terrain/splatmap.png")),
+	                                                       Texture::load(game::config::Texture("terrain/splatmap.png"), Texture::UV_WRAP::CLAMP),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse1.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse3.jpg")),
 	                                                       Texture::load(game::config::Texture("water_seamless/water.jpg")),
 	                                                       Texture::load(game::config::Texture("water_foam/foam.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
-	                                                       glm::vec4(10),
+	                                                       glm::vec4(13.5, 10, 8, 10),
 	                                                       0.5, vertexDistance);
 	terrainMaterial->SetAmbientIntensity(0.1);
-	terrainMaterial->SetSpecularIntensity(1);
-	terrainMaterial->SetShininess(512);
+	terrainMaterial->SetSpecularIntensity(0.5);
+	terrainMaterial->SetShininess(64);
 
 	LitTextureMaterial* trafficConeMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("traffic_cone/diffuse.png")));
 	trafficConeMaterial->SetAmbientIntensity(0.1f);
@@ -197,7 +169,7 @@ void MGEGame::_initializeScene() {
 	directional->SetAmbientColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f));
 	directional->SetSpecularColor(glm::vec3(210, 250, 248) / 255.0f);
 	auto* lightBeh3 = new LightRotatingBehaviour(utils::constants::deg45, {30, 0, 0});
-	directional->SetBehaviour(lightBeh3);
+	//directional->SetBehaviour(lightBeh3);
 
 	GameObject* lightCube = new GameObject("lightCube", glm::vec3(0, 0, 0));
 	lightCube->Rotate(-utils::constants::deg90, utils::constants::right);

@@ -14,6 +14,7 @@
 #include "mge/core/ShaderProgram.hpp"
 #include "mge/core/Texture.hpp"
 #include "mge/core/World.hpp"
+#include "mge/util/Time.hpp"
 
 ShaderProgram* TerrainMaterial::_shader = nullptr;
 
@@ -101,6 +102,7 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 
 	// Base
 	utils::gl::PassTexture(_shader, "terrainVert.heightmap", 0, heightmap->getId());
+	utils::gl::PassTexture(_shader, "terrainVert.splatmap", 1, splatmap->getId());
 	utils::gl::PassTexture(_shader, "terrainFrag.splatmap", 1, splatmap->getId());
 
 	utils::gl::PassTexture(_shader, "terrainFrag.baseTexture", 2, baseTexture->getId());
@@ -113,6 +115,7 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeWaterB"), textureSizes.z);
 	utils::gl::PassTexture(_shader, "terrainFrag.textureB", 6, textureB->getId());
 	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeB"), textureSizes.w);
+	glUniform1f(_shader->getUniformLocation("time"), mge::Time::TotalTime());
 
 	glUniform3fv(_shader->getUniformLocation("eye"), 1, glm::value_ptr(eye));
 
