@@ -97,15 +97,14 @@ void MGEGame::_initializeScene() {
 
 	// mesh size / mesh vertices (on one side)
 	const float vertexDistance = 2.0f / 65.0f;
-	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(mge::config::Texture("terrain/heightmap.png")),
-	                                                       Texture::load(mge::config::Texture("terrain/splatmap.png")),
+	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(game::config::Texture("terrain/heightmap.png"), Texture::UV_WRAP::CLAMP),
+	                                                       Texture::load(game::config::Texture("terrain/splatmap.png")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse1.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse3.jpg")),
 	                                                       Texture::load(game::config::Texture("water_seamless/water.jpg")),
 	                                                       Texture::load(game::config::Texture("water_foam/foam.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
-	                                                       Texture::load(mge::config::Texture("terrain/diffuse2.jpg")),
-	                                                       glm::vec6(10),
+	                                                       glm::vec4(10),
 	                                                       0.5, vertexDistance);
 	terrainMaterial->SetAmbientIntensity(0.1);
 	terrainMaterial->SetSpecularIntensity(1);

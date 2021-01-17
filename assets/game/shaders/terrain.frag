@@ -23,8 +23,6 @@ struct TerrainData {
     float sizeWaterB;
     sampler2D textureB;
     float sizeB;
-    sampler2D textureA;
-    float sizeA;
 };
 
 struct LightData {
@@ -147,15 +145,13 @@ void main() {
     vec4 textureWaterA = texture2D(terrainFrag.waterA, uv * terrainFrag.sizeWaterA);
     vec4 textureWaterB = texture2D(terrainFrag.waterB, uv * terrainFrag.sizeWaterB);
     vec4 textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
-    vec4 textureA = texture2D(terrainFrag.textureA, uv * terrainFrag.sizeA);
 
-    vec4 weights = vec4(splatmap.r * splatmap.a, splatmap.g * splatmap.a, splatmap.b * splatmap.a, splatmap.a);
-    float sum = weights.r + weights.g + weights.b + weights.a;
-    if(sum > 0.0001) 
-        weights /= sum;
-    float baseWeight = 1 - (weights.r + weights.g + weights.b + weights.a);
+    vec3 weights = splatmap.rgb;
+    float baseWeight = clamp(1.0 - (weights.r + weights.g + weights.b), 0, 1);
 
-    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWaterA + weights.b * textureB + weights.a * textureA);
+    
+
+    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWaterA + weights.b * textureB);
 
     float specularMask = weights.g;
 
@@ -170,8 +166,6 @@ void main() {
             light += Spotlight(lights[i], norm, view, diffuseTexture, specularMask);
         }
     }
-
-    //light = normalize(light);
 
     FragColor = vec4(light, 1);
 }
