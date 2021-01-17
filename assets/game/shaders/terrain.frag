@@ -17,8 +17,10 @@ struct TerrainData {
     float baseSize;
     sampler2D textureR;
     float sizeR;
-    sampler2D textureG;
-    float sizeG;
+    sampler2D waterA;
+    float sizeWaterA;
+    sampler2D waterB;
+    float sizeWaterB;
     sampler2D textureB;
     float sizeB;
     sampler2D textureA;
@@ -142,16 +144,19 @@ void main() {
     vec4 splatmap = texture2D(terrainFrag.splatmap, uv);
     vec4 baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
     vec4 textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
-    vec4 textureG = texture2D(terrainFrag.textureG, uv * terrainFrag.sizeG);
+    vec4 textureWaterA = texture2D(terrainFrag.waterA, uv * terrainFrag.sizeWaterA);
+    vec4 textureWaterB = texture2D(terrainFrag.waterB, uv * terrainFrag.sizeWaterB);
     vec4 textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
     vec4 textureA = texture2D(terrainFrag.textureA, uv * terrainFrag.sizeA);
 
-    vec4 weights = splatmap;
+    vec4 weights = vec4(splatmap.r * splatmap.a, splatmap.g * splatmap.a, splatmap.b * splatmap.a, splatmap.a);
     float sum = weights.r + weights.g + weights.b + weights.a;
-    weights /= sum;
+    if(sum > 0.0001) 
+        weights /= sum;
     float baseWeight = 1 - (weights.r + weights.g + weights.b + weights.a);
 
-    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureG + weights.b * textureB + weights.a * textureA);
+    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWaterA + weights.b * textureB + weights.a * textureA);
+
     float specularMask = weights.g;
 
     vec3 light = vec3(0);

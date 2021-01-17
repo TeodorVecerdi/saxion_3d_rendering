@@ -17,9 +17,9 @@
 
 ShaderProgram* TerrainMaterial::_shader = nullptr;
 
-TerrainMaterial::TerrainMaterial(Texture* heightmap, Texture* splatmap, Texture* baseTexture, Texture* textureR, Texture* textureG, Texture* textureB, Texture* textureA,
-                                 glm::vec5 textureSizes, const float height, const float normalStepSize) : heightmap(heightmap), splatmap(splatmap), baseTexture(baseTexture),
-                                                                                                           textureR(textureR), textureG(textureG), textureB(textureB),
+TerrainMaterial::TerrainMaterial(Texture* heightmap, Texture* splatmap, Texture* baseTexture, Texture* textureR, Texture* textureWaterA, Texture* textureWaterB, Texture* textureB, Texture* textureA,
+                                 glm::vec6 textureSizes, const float height, const float normalStepSize) : heightmap(heightmap), splatmap(splatmap), baseTexture(baseTexture),
+                                                                                                           textureR(textureR), textureWaterA(textureWaterA), textureWaterB(textureWaterB), textureB(textureB),
                                                                                                            textureA(textureA), textureSizes(textureSizes), height(height),
                                                                                                            normalStepSize(normalStepSize), ambientColor(1, 1, 1, 0.1f),
                                                                                                            specularColor(1, 1, 1, 0.5f), shininess(256), eye(0) {
@@ -107,12 +107,14 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	glUniform1f(_shader->getUniformLocation("terrainFrag.baseSize"), textureSizes.a);
 	utils::gl::PassTexture(_shader, "terrainFrag.textureR", 3, textureR->getId());
 	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeR"), textureSizes.b);
-	utils::gl::PassTexture(_shader, "terrainFrag.textureG", 4, textureG->getId());
-	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeG"), textureSizes.c);
-	utils::gl::PassTexture(_shader, "terrainFrag.textureB", 5, textureB->getId());
+	utils::gl::PassTexture(_shader, "terrainFrag.waterA", 4, textureWaterA->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeWaterA"), textureSizes.c);
+	utils::gl::PassTexture(_shader, "terrainFrag.waterB", 5, textureWaterB->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeWaterB"), textureSizes.d);
+	utils::gl::PassTexture(_shader, "terrainFrag.textureB", 6, textureB->getId());
 	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeB"), textureSizes.d);
-	utils::gl::PassTexture(_shader, "terrainFrag.textureA", 6, textureA->getId());
-	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeA"), textureSizes.e);
+	utils::gl::PassTexture(_shader, "terrainFrag.textureA", 7, textureA->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeA"), textureSizes.f);
 
 	glUniform3fv(_shader->getUniformLocation("eye"), 1, glm::value_ptr(eye));
 

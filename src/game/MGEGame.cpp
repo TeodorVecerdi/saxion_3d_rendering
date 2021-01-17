@@ -101,10 +101,11 @@ void MGEGame::_initializeScene() {
 	                                                       Texture::load(mge::config::Texture("terrain/splatmap.png")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse1.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse3.jpg")),
-	                                                       Texture::load(mge::config::Texture("terrain/water.jpg")),
+	                                                       Texture::load(game::config::Texture("water_seamless/water.jpg")),
+	                                                       Texture::load(game::config::Texture("water_foam/foam.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse2.jpg")),
-	                                                       glm::vec5(10),
+	                                                       glm::vec6(10),
 	                                                       0.5, vertexDistance);
 	terrainMaterial->SetAmbientIntensity(0.1);
 	terrainMaterial->SetSpecularIntensity(1);
