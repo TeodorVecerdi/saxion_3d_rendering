@@ -98,16 +98,21 @@ void MGEGame::_initializeScene() {
 	// mesh size / mesh vertices (on one side)
 	const float vertexDistance = 2.0f / 65.0f;
 	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(mge::config::Texture("terrain/heightmap.png")),
-	                                                        Texture::load(mge::config::Texture("terrain/splatmap.png")),
-		                                                        0.25, vertexDistance);
-		terrainMaterial->SetAmbientIntensity(0.1);
-		terrainMaterial->SetShininess(1024);
-		terrainMaterial->SetSpecularIntensity(0.0f);
+	                                                       Texture::load(mge::config::Texture("terrain/splatmap.png")),
+	                                                       Texture::load(mge::config::Texture("terrain/diffuse1.jpg")),
+	                                                       Texture::load(mge::config::Texture("terrain/diffuse3.jpg")),
+	                                                       Texture::load(mge::config::Texture("terrain/water.jpg")),
+	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
+	                                                       Texture::load(mge::config::Texture("terrain/diffuse2.jpg")),
+	                                                       glm::vec5(10),
+	                                                       0.5, vertexDistance);
+	terrainMaterial->SetAmbientIntensity(0.1);
+	terrainMaterial->SetSpecularIntensity(1);
+	terrainMaterial->SetShininess(512);
 
-		LitTextureMaterial* trafficConeMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("traffic_cone/diffuse.png")));
+	LitTextureMaterial* trafficConeMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("traffic_cone/diffuse.png")));
 	trafficConeMaterial->SetAmbientIntensity(0.1f);
 	AbstractMaterial* bricks_Material = new WobbleTextureMaterial(Texture::load(mge::config::Texture("bricks.jpg")));
-
 
 	//SCENE SETUP
 	GameObject* terrain = new GameObject("Terrain", utils::constants::zero);
@@ -117,7 +122,6 @@ void MGEGame::_initializeScene() {
 	//RotatingBehaviour* terrainBehaviour = new RotatingBehaviour(15, utils::constants::up);
 	//terrain->SetBehaviour(terrainBehaviour);
 	_world->AddChild(terrain);
-	
 
 	//add camera first (it will be updated last)
 	Camera* camera = new Camera("camera", glm::vec3(0, 2, -10));
@@ -151,8 +155,12 @@ void MGEGame::_initializeScene() {
 	mainSphere->AddChild(cubeRight);
 	mainSphere->AddChild(cubeForward);
 
-	// auto* objectFollow = new ObjectFollow(mainSphere, glm::vec3(0, 6, -6), glm::vec3(-45, -180, 0));
-	// camera->setBehaviour(objectFollow);
+	GameObject* bigSphere = new GameObject("bigSphere", utils::constants::up * 10);
+	bigSphere->SetMesh(sphereSmoothMesh);
+	bigSphere->SetMaterial(litMaterial);
+	bigSphere->Scale(glm::vec3(10));
+	_world->AddChild(bigSphere);
+
 	auto* cameraOrbit = new CameraOrbit(mainSphere, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
 	camera->SetBehaviour(cameraOrbit);
 
@@ -183,9 +191,9 @@ void MGEGame::_initializeScene() {
 	directional->SetDirection(glm::normalize(lightDirection));
 	directional->Rotate(utils::constants::deg45, utils::constants::up);
 	directional->Rotate(utils::constants::deg30, utils::constants::right);
-	directional->SetAttenuation(1, 0.0f, 0.0f);
+	directional->SetAttenuation(1, 0, 0.0f);
 	directional->SetLightType(LightType::DIRECTIONAL);
-	directional->SetDiffuseColor(0.8*glm::vec3(1.0f, 1.0f, 1.0f));
+	directional->SetDiffuseColor(0.8 * glm::vec3(1.0f, 1.0f, 1.0f));
 	directional->SetAmbientColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f));
 	directional->SetSpecularColor(glm::vec3(210, 250, 248) / 255.0f);
 	auto* lightBeh3 = new LightRotatingBehaviour(utils::constants::deg45, {30, 0, 0});

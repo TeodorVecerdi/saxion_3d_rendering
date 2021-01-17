@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mge/materials/AbstractMaterial.hpp"
+#include "game/utils/vec5.hpp"
 
 class Texture;
 class ShaderProgram;
@@ -11,7 +12,7 @@ class ShaderProgram;
  */
 class TerrainMaterial : public AbstractMaterial {
 public:
-	TerrainMaterial(Texture* heightmapTexture, Texture* splatmapTexture, float height, float normalStepSize);
+	TerrainMaterial(Texture* heightmapTexture, Texture* splatmapTexture, Texture* baseTexture, Texture* textureR, Texture* textureG, Texture* textureB, Texture* textureA, glm::vec5 textureSizes, float height, float normalStepSize);
 
 	void render(World* world, Mesh* mesh, const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) override;
 
@@ -45,6 +46,13 @@ private:
 	//this one is unique per instance of color material
 	Texture* heightmap;
 	Texture* splatmap;
+	Texture* baseTexture;
+	Texture* textureR;
+	Texture* textureG;
+	Texture* textureB;
+	Texture* textureA;
+	glm::vec5 textureSizes;
+	
 	glm::vec4 ambientColor; // rgb=color, a=intensity
 	glm::vec4 specularColor; // rgb=color, a=intensity
 	float shininess;

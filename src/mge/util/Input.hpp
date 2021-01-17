@@ -56,7 +56,7 @@ namespace mge {
 					const auto sfViewportCenter = sf::Vector2i(static_cast<int>(viewportCenter.x), static_cast<int>(viewportCenter.y));
 					sf::Mouse::setPosition(sfViewportCenter, *instance->windowReference);
 				}
-				// instance->SetMouseVisible(!mouseLock);
+				instance->SetMouseVisible(!mouseLock);
 			}
 
 			Input::mouseLock = mouseLock;

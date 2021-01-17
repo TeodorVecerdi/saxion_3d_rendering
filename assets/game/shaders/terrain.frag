@@ -14,10 +14,15 @@ struct TerrainData {
     sampler2D splatmap;
 
     sampler2D baseTexture;
+    float baseSize;
     sampler2D textureR;
+    float sizeR;
     sampler2D textureG;
+    float sizeG;
     sampler2D textureB;
+    float sizeB;
     sampler2D textureA;
+    float sizeA;
 };
 
 struct LightData {
@@ -50,7 +55,7 @@ uniform uint lightCount;
 uniform LightData lights[MAX_LIGHTS];
 
 
-vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled) {
+vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, float specularMask) {
     vec3 AMBIENT = light.ambient.a * light.ambient.rgb;
 
     vec3 lightDir = normalize(light.position - fragPosition);
@@ -68,7 +73,7 @@ vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled) {
 
     vec3 r = reflect(-lightDir, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = shineFactor * light.specular;
+    vec3 SPECULAR = specularMask * shineFactor * light.specular;
     
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * dist + light.attenuation.z * distSqr);
     AMBIENT *= attenuation;
@@ -85,7 +90,7 @@ vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled) {
     );
 }
 
-vec3 DirectionalLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled) {
+vec3 DirectionalLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, float specularMask) {
     vec3 AMBIENT = light.ambient.a * light.ambient.rgb;
     
     vec3 direction = normalize(-light.direction);
@@ -94,7 +99,7 @@ vec3 DirectionalLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled
     
     vec3 r = reflect(-direction, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = shineFactor * light.specular;
+    vec3 SPECULAR = specularMask * shineFactor * light.specular;
     
     return (
         AMBIENT * diffuseSampled +
@@ -103,7 +108,7 @@ vec3 DirectionalLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled
      );
 }
 
-vec3 PointLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled) {
+vec3 PointLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, float specularMask) {
     vec3 AMBIENT = light.ambient.a * light.ambient.rgb;
     
     float dist = distance(light.position, fragPosition);
@@ -114,7 +119,7 @@ vec3 PointLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled) {
     
     vec3 r = reflect(-direction, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = shineFactor * light.specular;
+    vec3 SPECULAR = specularMask * shineFactor * light.specular;
 
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * dist + light.attenuation.z * distSqr);
     
@@ -133,17 +138,31 @@ void main() {
     // Precompute common values
     vec3 norm = normalize(normal);
     vec3 view = normalize(eye - fragPosition);
-    vec3 diffuseTexture = vec3(0.2, 1, 0.1);//vec3(texture(terrainFrag.splatmap, uv));
+    
+    vec4 splatmap = texture2D(terrainFrag.splatmap, uv);
+    vec4 baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
+    vec4 textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
+    vec4 textureG = texture2D(terrainFrag.textureG, uv * terrainFrag.sizeG);
+    vec4 textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
+    vec4 textureA = texture2D(terrainFrag.textureA, uv * terrainFrag.sizeA);
+
+    vec4 weights = splatmap;
+    float sum = weights.r + weights.g + weights.b + weights.a;
+    weights /= sum;
+    float baseWeight = 1 - (weights.r + weights.g + weights.b + weights.a);
+
+    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureG + weights.b * textureB + weights.a * textureA);
+    float specularMask = weights.g;
 
     vec3 light = vec3(0);
 
     for(int i = 0; i < lightCount; i++) {
         if(lights[i].type == DIRECTIONAL) {
-            light += DirectionalLight(lights[i], norm, view, diffuseTexture);
+            light += DirectionalLight(lights[i], norm, view, diffuseTexture, specularMask);
         } else if(lights[i].type == POINT) {
-            light += PointLight(lights[i], norm, view, diffuseTexture);
+            light += PointLight(lights[i], norm, view, diffuseTexture, specularMask);
         } else if(lights[i].type == SPOTLIGHT) {
-            light += Spotlight(lights[i], norm, view, diffuseTexture);
+            light += Spotlight(lights[i], norm, view, diffuseTexture, specularMask);
         }
     }
 

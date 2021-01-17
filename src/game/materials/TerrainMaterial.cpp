@@ -2,10 +2,11 @@
 
 #include "TerrainMaterial.hpp"
 
+#include <SFML/Window/Keyboard.hpp>
+
 #include "game/config.hpp"
 #include "game/utils/constants.hpp"
 #include "game/utils/gl_utils.hpp"
-#include "game/utils/math_utils.hpp"
 #include "game/utils/string_utils.hpp"
 #include "mge/core/Camera.hpp"
 #include "mge/core/Light.hpp"
@@ -14,9 +15,14 @@
 #include "mge/core/Texture.hpp"
 #include "mge/core/World.hpp"
 
-ShaderProgram* TerrainMaterial::_shader = NULL;
+ShaderProgram* TerrainMaterial::_shader = nullptr;
 
-TerrainMaterial::TerrainMaterial(Texture* heightmap, Texture* splatmap, const float height, const float normalStepSize): heightmap(heightmap), splatmap(splatmap), height(height), normalStepSize(normalStepSize), ambientColor(1,1,1,0.1f), specularColor(1,1,1,0.5f), shininess(256), eye(0) {
+TerrainMaterial::TerrainMaterial(Texture* heightmap, Texture* splatmap, Texture* baseTexture, Texture* textureR, Texture* textureG, Texture* textureB, Texture* textureA,
+                                 glm::vec5 textureSizes, const float height, const float normalStepSize) : heightmap(heightmap), splatmap(splatmap), baseTexture(baseTexture),
+                                                                                                           textureR(textureR), textureG(textureG), textureB(textureB),
+                                                                                                           textureA(textureA), textureSizes(textureSizes), height(height),
+                                                                                                           normalStepSize(normalStepSize), ambientColor(1, 1, 1, 0.1f),
+                                                                                                           specularColor(1, 1, 1, 0.5f), shininess(256), eye(0) {
 	//every time we create an instance of colormaterial we check if the corresponding shader has already been loaded
 	_lazyInitializeShader();
 }
@@ -58,9 +64,11 @@ void TerrainMaterial::SetSpecularIntensity(float intensity) {
 void TerrainMaterial::SetShininess(float shininess) {
 	this->shininess = shininess;
 }
+
 void TerrainMaterial::SetHeight(float height) {
 	this->height = height;
 }
+
 void TerrainMaterial::SetNormalStepSize(float normalStepSize) {
 	this->normalStepSize = normalStepSize;
 }
@@ -71,7 +79,7 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	eye = world->getMainCamera()->GetWorldPosition();
 
 	const size_t lightCount = std::min(world->getLightCount(), TerrainMaterial::MAX_LIGHTS);
-	for(size_t i = 0; i < lightCount; i++) {
+	for (size_t i = 0; i < lightCount; i++) {
 		const LightData ld = world->getLightAt(i)->GetLightData();
 		const std::string lStr = utils::str::string_format("lights[%u]", i);
 		glUniform1ui(_shader->getUniformLocation(lStr + ".type"), static_cast<uint32_t>(ld.type));
@@ -91,13 +99,22 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	glUniform1f(_shader->getUniformLocation("terrainVert.height"), height);
 	glUniform1f(_shader->getUniformLocation("terrainVert.normalStepSize"), normalStepSize);
 
-
 	// Base
 	utils::gl::PassTexture(_shader, "terrainVert.heightmap", 0, heightmap->getId());
 	utils::gl::PassTexture(_shader, "terrainFrag.splatmap", 1, splatmap->getId());
-	
+
+	utils::gl::PassTexture(_shader, "terrainFrag.baseTexture", 2, baseTexture->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.baseSize"), textureSizes.a);
+	utils::gl::PassTexture(_shader, "terrainFrag.textureR", 3, textureR->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeR"), textureSizes.b);
+	utils::gl::PassTexture(_shader, "terrainFrag.textureG", 4, textureG->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeG"), textureSizes.c);
+	utils::gl::PassTexture(_shader, "terrainFrag.textureB", 5, textureB->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeB"), textureSizes.d);
+	utils::gl::PassTexture(_shader, "terrainFrag.textureA", 6, textureA->getId());
+	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeA"), textureSizes.e);
+
 	glUniform3fv(_shader->getUniformLocation("eye"), 1, glm::value_ptr(eye));
-	
 
 	//pass in all MVP matrices separately
 	glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
