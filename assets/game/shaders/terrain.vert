@@ -179,7 +179,7 @@ void main() {
 		//norm = normC;
 		norm = vec3(norm.x, norm.y, -norm.z);
 		//norm = normalize(norm);
-	} else {
+	} else if (false) {
 		// Calculate that damn normal by first obtaining the height of 4 surrounding vertices 
 		vec2 uvLeft = i_uv + vec2(-0.5*terrainVert.normalStepSize, 0);
 		vec2 uvRight = i_uv + vec2(0.5*terrainVert.normalStepSize, 0);
@@ -196,6 +196,30 @@ void main() {
 		float nY = terrainVert.normalStepSize;
 		float nZ = (hUp - hDown)/2.0;
 		norm = normalize(vec3(nX, nY, nZ));
+	} else {
+		float ax = terrainVert.normalStepSize;
+		float ay = terrainVert.normalStepSize;
+
+		vec2 uvLeft = i_uv + vec2(-0.5*terrainVert.normalStepSize, 0);
+		vec2 uvRight = i_uv + vec2(0.5*terrainVert.normalStepSize, 0);
+		vec2 uvUp = i_uv + vec2(0, -0.5*terrainVert.normalStepSize);
+		vec2 uvDown = i_uv + vec2(0, 0.5*terrainVert.normalStepSize);
+
+		float heightLeft = height(uvLeft);
+		float heightRight = height(uvRight);
+		float heightUp = height(uvUp);
+		float heightDown = height(uvDown);
+
+		vec3 left = vec3(vertex.x - ax, heightLeft, vertex.z);
+		vec3 up = vec3(vertex.x, heightUp, vertex.z+ay);
+		vec3 right = vec3(vertex.x + ax, heightRight, vertex.z);
+		vec3 down = vec3(vertex.x, heightLeft, vertex.z - ay);
+		vec3 N1 = cross(up, left);
+		vec3 N2 = cross(right, up);
+		vec3 N3 = cross(down, right);
+		vec3 N4 = cross(left, down);
+
+		norm = normalize(N1 + N2 + N3 + N4);
 	}
 
 	
