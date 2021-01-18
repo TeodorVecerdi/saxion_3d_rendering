@@ -2,6 +2,8 @@
 
 #include "TerrainMaterial.hpp"
 
+
+#include <iostream>
 #include <SFML/Window/Keyboard.hpp>
 
 #include "game/config.hpp"
@@ -78,6 +80,12 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	_shader->use();
 
 	eye = world->getMainCamera()->GetWorldPosition();
+	float change = 0;
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::J)) change -= 1;
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) change += 1;
+
+	normalStepSize += change * 0.005 * mge::Time::DeltaTime();
+	std::cout << "Normal step size: " << normalStepSize << "\n"; 
 
 	const size_t lightCount = std::min(world->getLightCount(), TerrainMaterial::MAX_LIGHTS);
 	for (size_t i = 0; i < lightCount; i++) {
@@ -116,6 +124,7 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	utils::gl::PassTexture(_shader, "terrainFrag.textureB", 6, textureB->getId());
 	glUniform1f(_shader->getUniformLocation("terrainFrag.sizeB"), textureSizes.w);
 	glUniform1f(_shader->getUniformLocation("time"), mge::Time::TotalTime());
+	glUniform1i(_shader->getUniformLocation("shouldTriplanar"), sf::Keyboard::isKeyPressed(sf::Keyboard::T));
 
 	glUniform3fv(_shader->getUniformLocation("eye"), 1, glm::value_ptr(eye));
 

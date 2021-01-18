@@ -115,22 +115,19 @@ float height(vec2 position) {
 	float h = heightRaw(position);
 	vec4 weights = splatWeight(textureLod(terrainVert.splatmap, position, 0));
 	
-	//float waveHeight = 0.25;
-	//float s = (sin(time + i_vertex.x*10 + i_vertex.x * time + i_vertex.z*0) + 1.0) / 2.0;
-	//float s2 = (sin(time*4 + i_vertex.x*5 + i_vertex.z*20) + 1.0) / 2.0;
-	//float s3 = (sin(time*8 + i_vertex.x*5 + i_vertex.z*1) + 1.0) / 2.0;
-	//float s4 = (cos(time*16 + i_vertex.x*50) + 1.0) / 2.0;
-	//float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
-	//return h + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4);// * weights.g;
+	float waveHeight = 0.15;
+	float s = (sin(time + i_vertex.x*10 + i_vertex.x * time + i_vertex.z*0) + 1.0) / 2.0;
+	float s2 = (sin(time*4 + i_vertex.x*5 + i_vertex.z*20) + 1.0) / 2.0;
+	float s3 = (sin(time*8 + i_vertex.x*5 + i_vertex.z*1) + 1.0) / 2.0;
+	float s4 = (cos(time*16 + i_vertex.x*50) + 1.0) / 2.0;
+	float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
+	return h + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4) * weights.g;
 	
-	float waveHeight = 0.09;
-	float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
-	float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
-	float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
-
-	return h + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
-
-	
+	//float waveHeight = 0.09;
+	//float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
+	//float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
+	//float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
+	//return h + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
 }
 
 
@@ -139,6 +136,48 @@ float height(vec2 position) {
 // |           https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83             |
 // \-----------------------------------------------------------------------------------------/
 
+vec3 findNormal(vec2 uv, float u) {
+	vec2 offsets[4];
+	offsets[0] = uv + vec2(-u, 0);
+    offsets[1] = uv + vec2(u, 0);
+    offsets[2] = uv + vec2(0, u);
+    offsets[3] = uv + vec2(0, -u);
+
+	float hts[4];
+    for(int i = 0; i < 4; i++) {
+        hts[i] = height(offsets[i]);
+    }
+
+	vec2 _step = vec2(2.0/64.0, 0.0);
+               
+    vec3 va = normalize( vec3(_step.xy, hts[1]-hts[0]) );
+    vec3 vb = normalize( vec3(_step.yx, hts[3]-hts[2]) );
+    return cross(va,vb).xzy;
+}
+
+vec3 filterNormal(vec2 uv, float texelSize, int terrainSize) {
+	float h[4];
+	h[0] = height(uv + texelSize * vec2(0,-1));// * terrainVert.height;
+    h[1] = height(uv + texelSize * vec2(-1,0));// * terrainVert.height;
+    h[2] = height(uv + texelSize * vec2(1,0));// * terrainVert.height;
+    h[3] = height(uv + texelSize * vec2(0,1));// * terrainVert.height;
+	
+	vec3 n;
+	n.z = -(h[0] - h[3]);
+    n.x = (h[1] - h[2]);
+    n.y = 2 * texelSize * terrainSize;
+
+	return normalize(n);
+}
+
+vec3 normalAttempt3(vec2 uv, float stepSize) {
+	float hD = height(uv + stepSize * vec2(0,-1));
+	float hL = height(uv + stepSize * vec2(-1,0));
+	float hR = height(uv + stepSize * vec2(1,0));
+	float hU = height(uv + stepSize * vec2(0,1));
+	return normalize(vec3(hL-hR, stepSize, hD - hU));
+}
+
 void main() {
 	float h = height(i_uv);
 	vec3 vertex = vec3(i_vertex.x, terrainVert.height * h, i_vertex.z);
@@ -146,11 +185,12 @@ void main() {
 
 	vec3 norm;
 
-	if(true) {
-		vec2 uvLeft = i_uv + vec2(-0.5*terrainVert.normalStepSize, 0);
-		vec2 uvRight = i_uv + vec2(0.5*terrainVert.normalStepSize, 0);
-		vec2 uvUp = i_uv + vec2(0, 0.5*terrainVert.normalStepSize);
-		vec2 uvDown = i_uv + vec2(0, -0.5*terrainVert.normalStepSize);
+	if(false) {
+		float nss = terrainVert.normalStepSize;
+		vec2 uvLeft = i_uv + vec2(-0.5*nss, 0);
+		vec2 uvRight = i_uv + vec2(0.5*nss, 0);
+		vec2 uvUp = i_uv + vec2(0, 0.5*nss);
+		vec2 uvDown = i_uv + vec2(0, -0.5*nss);
 
 		float hLeft = height(uvLeft);
 		float hRight = height(uvRight);
@@ -158,10 +198,10 @@ void main() {
 		float hDown = height(uvDown);
 
 		// Get position of neighbouring vertices
-		vec3 vertexLeft = vec3(i_vertex.x - terrainVert.normalStepSize, terrainVert.height * hLeft, i_vertex.z);
-		vec3 vertexRight = vec3(i_vertex.x + terrainVert.normalStepSize, terrainVert.height * hRight, i_vertex.z);
-		vec3 vertexUp = vec3(i_vertex.x, terrainVert.height * hUp, i_vertex.z + terrainVert.normalStepSize);
-		vec3 vertexDown = vec3(i_vertex.x, terrainVert.height * hDown, i_vertex.z - terrainVert.normalStepSize);
+		vec3 vertexLeft = vec3(i_vertex.x - nss, terrainVert.height * hLeft, i_vertex.z);
+		vec3 vertexRight = vec3(i_vertex.x + nss, terrainVert.height * hRight, i_vertex.z);
+		vec3 vertexUp = vec3(i_vertex.x, terrainVert.height * hUp, i_vertex.z + nss);
+		vec3 vertexDown = vec3(i_vertex.x, terrainVert.height * hDown, i_vertex.z - nss);
 
 		// Calculate direction from current vertex to the neighbouring vertices;
 		vec3 vertLeft = normalize(vertexLeft - vertex);
@@ -197,7 +237,7 @@ void main() {
 		float nY = terrainVert.normalStepSize;
 		float nZ = (hUp - hDown)/2.0;
 		norm = normalize(vec3(nX, nY, nZ));
-	} else {
+	} else if (false) {
 		float ax = terrainVert.normalStepSize;
 		float ay = terrainVert.normalStepSize;
 
@@ -221,11 +261,13 @@ void main() {
 		vec3 N4 = cross(left, down);
 
 		norm = normalize(N1 + N2 + N3 + N4);
+	} else {
+		norm = normalAttempt3(i_uv, terrainVert.normalStepSize);
 	}
 
 	
 	uv = i_uv;
-	normal = vec3(modelMatrix * vec4(norm, 0.0));
+	normal = vec3(modelMatrix * vec4(norm, 1.0));
 	//normal = norm;
 	fragPosition = vec3(modelMatrix * vec4(vertex, 1.0));
 }

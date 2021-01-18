@@ -51,6 +51,7 @@ uniform vec3 eye;
 uniform MaterialData material;
 uniform TerrainData terrainFrag;
 uniform float time;
+uniform bool shouldTriplanar;
 
 uniform uint lightCount;
 uniform LightData lights[MAX_LIGHTS];
@@ -135,23 +136,53 @@ vec3 PointLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, floa
     );
 }
 
+vec4 triplanar(sampler2D tex, vec3 blending, vec3 coords, float worldScale) {
+    vec4 xAxis = texture2D(tex, coords.yz * worldScale);
+    vec4 yAxis = texture2D(tex, coords.xz * worldScale);
+    vec4 zAxis = texture2D(tex, coords.xy * worldScale);
+    return blending.x * xAxis + blending.y * yAxis + blending.z * zAxis;
+    return vec4(0);
+}
+
 void main() {
     // Precompute common values
     vec3 norm = normalize(normal);
     vec3 view = normalize(eye - fragPosition);
+
+    vec3 blending = normalize(max(abs(normal), 0.000001));
+    float sum = blending.x + blending.y + blending.z;
+    blending /= sum;
     
     vec4 splatmap = texture2D(terrainFrag.splatmap, uv);
     vec3 weights = splatmap.rgb;
     float baseWeight = clamp(1.0 - (weights.r + weights.g + weights.b), 0, 1);
-    
-    vec4 baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
-    vec4 textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
-    vec4 textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
+    vec4 baseTexture;
+    vec4 textureR;
+    vec4 textureB;
+    vec4 textureWaterA;
+    vec4 textureWaterB;
+    vec4 textureWaterC;
+
+    if(!shouldTriplanar) {
+        baseTexture = triplanar(terrainFrag.baseTexture, blending, fragPosition, 0.7/terrainFrag.baseSize);
+        textureR = triplanar(terrainFrag.textureR, blending, fragPosition, 0.7/terrainFrag.sizeR);
+        textureB = triplanar(terrainFrag.textureB, blending, fragPosition, 0.7/terrainFrag.sizeB);
+        textureWaterA = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(4,2, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA);
+        textureWaterB = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(-6,1, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA * 0.7);
+        textureWaterC = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(-1,-7, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA * 4);
+    } else {
+        baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
+        textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
+        textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
+        textureWaterA = texture2D(terrainFrag.waterA, (uv + time*vec2(0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA);
+        textureWaterB = texture2D(terrainFrag.waterA, (uv + 0.7*time*vec2(-0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA * 0.7);
+        textureWaterC = texture2D(terrainFrag.waterA, (uv + 0.4*time*vec2(-0.02,-0.01/*direction*/)) * terrainFrag.sizeWaterA * 4);
+    }
 
     // Water
-    vec4 textureWaterA = texture2D(terrainFrag.waterA, (uv + time*vec2(0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA);
-    vec4 textureWaterB = texture2D(terrainFrag.waterA, (uv + 0.7*time*vec2(-0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA * 0.7);
-    vec4 textureWaterC = texture2D(terrainFrag.waterA, (uv + 0.4*time*vec2(-0.02,-0.01/*direction*/)) * terrainFrag.sizeWaterA * 4);
+    //textureWaterA = texture2D(terrainFrag.waterA, (uv + time*vec2(0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA);
+    //textureWaterB = texture2D(terrainFrag.waterA, (uv + 0.7*time*vec2(-0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA * 0.7);
+    //textureWaterC = texture2D(terrainFrag.waterA, (uv + 0.4*time*vec2(-0.02,-0.01/*direction*/)) * terrainFrag.sizeWaterA * 4);
     vec4 foamTex = texture2D(terrainFrag.waterB, (uv + 0.15 * vec2(sin(time * 0.45) * 0.05, cos(time * 0.75 + 2.6) * 0.05)) * terrainFrag.sizeWaterB);
    
     // blend water
@@ -166,6 +197,8 @@ void main() {
 
     float specularMask = weights.g + weights.b;
 
+    diffuseTexture = vec3(0.8);
+
     vec3 light = vec3(0);
 
     for(int i = 0; i < lightCount; i++) {
@@ -178,5 +211,5 @@ void main() {
         }
     }
 
-    FragColor = vec4(light, 1);
+    FragColor = vec4((norm), 1);
 }
