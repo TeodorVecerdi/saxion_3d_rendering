@@ -123,11 +123,12 @@ float height(vec2 position) {
 	//float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
 	//return h + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4);// * weights.g;
 	
-	float waveHeight = 0.05;
+	float waveHeight = 0.09;
 	float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
 	float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
 	float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
-	return h + (noise1 + noise2 + noise3) * waveHeight * weights.g;
+
+	return h + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
 
 	
 }
@@ -224,7 +225,7 @@ void main() {
 
 	
 	uv = i_uv;
-	normal = vec3(modelMatrix * vec4(norm, 0.0f));
+	normal = vec3(modelMatrix * vec4(norm, 0.0));
 	//normal = norm;
 	fragPosition = vec3(modelMatrix * vec4(vertex, 1.0));
 }

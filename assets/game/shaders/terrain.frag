@@ -50,6 +50,7 @@ out vec4 FragColor;
 uniform vec3 eye;
 uniform MaterialData material;
 uniform TerrainData terrainFrag;
+uniform float time;
 
 uniform uint lightCount;
 uniform LightData lights[MAX_LIGHTS];
@@ -140,20 +141,30 @@ void main() {
     vec3 view = normalize(eye - fragPosition);
     
     vec4 splatmap = texture2D(terrainFrag.splatmap, uv);
-    vec4 baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
-    vec4 textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
-    vec4 textureWaterA = texture2D(terrainFrag.waterA, uv * terrainFrag.sizeWaterA);
-    vec4 textureWaterB = texture2D(terrainFrag.waterB, uv * terrainFrag.sizeWaterB);
-    vec4 textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
-
     vec3 weights = splatmap.rgb;
     float baseWeight = clamp(1.0 - (weights.r + weights.g + weights.b), 0, 1);
-
     
+    vec4 baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
+    vec4 textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
+    vec4 textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
 
-    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWaterA + weights.b * textureB);
+    // Water
+    vec4 textureWaterA = texture2D(terrainFrag.waterA, (uv + time*vec2(0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA);
+    vec4 textureWaterB = texture2D(terrainFrag.waterA, (uv + 0.7*time*vec2(-0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA * 0.7);
+    vec4 textureWaterC = texture2D(terrainFrag.waterA, (uv + 0.4*time*vec2(-0.02,-0.01/*direction*/)) * terrainFrag.sizeWaterA * 4);
+    vec4 foamTex = texture2D(terrainFrag.waterB, (uv + 0.15 * vec2(sin(time * 0.45) * 0.05, cos(time * 0.75 + 2.6) * 0.05)) * terrainFrag.sizeWaterB);
+   
+    // blend water
+    float foamWeight = 0.0 + 0.0 * (sin(time*4) + 1.0) / 2;
+    float texAWeight = 1 - foamWeight;
+    float texAAW = 0.6;
+    float texABW = 0.25;
+    float texACW = 0.15;
+    vec4 textureWater = texAWeight * (texAAW * textureWaterA + texABW * textureWaterB + texACW * textureWaterC) + foamWeight * foamTex;
 
-    float specularMask = weights.g;
+    vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWater + weights.b * textureB);
+
+    float specularMask = weights.g + weights.b;
 
     vec3 light = vec3(0);
 
