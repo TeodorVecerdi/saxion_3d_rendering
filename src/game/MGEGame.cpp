@@ -30,7 +30,6 @@
 #include "materials/LitTextureMaterial.hpp"
 #include "materials/TerrainMaterial.hpp"
 #include "materials/WobbleTextureMaterial.hpp"
-#include "mge/behaviours/RotatingBehaviour.hpp"
 #include "mge/core/Light.hpp"
 #include "utils/constants.hpp"
 
@@ -69,8 +68,8 @@ void MGEGame::_initializeScene() {
 
 	// mesh size / mesh vertices (on one side)
 	const float vertexDistance = 2.0f / 64.0f;
-	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(game::config::Texture("terrain/heightmap2.png"), Texture::UV_WRAP::CLAMP),
-	                                                       Texture::load(game::config::Texture("terrain/splatmap2.png"), Texture::UV_WRAP::CLAMP),
+	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(game::config::Texture("terrain/heightmap.png"), Texture::UV_WRAP::CLAMP),
+	                                                       Texture::load(game::config::Texture("terrain/splatmap.png"), Texture::UV_WRAP::CLAMP),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse1.jpg")),
 	                                                       Texture::load(game::config::Texture("terrain/uvtex.png")),
 	                                                       Texture::load(game::config::Texture("water_seamless/water.jpg")),

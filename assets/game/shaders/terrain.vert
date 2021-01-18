@@ -96,6 +96,11 @@ float simplex(vec3 v){
                                 dot(p2,x2), dot(p3,x3) ) );
 }
 
+// /-----------------------------------------------------------------------------------------\
+// |                              3D simplex noise taken from                                |
+// |           https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83             |
+// \-----------------------------------------------------------------------------------------/
+
 
 float map(float s, float a1, float a2, float b1, float b2) {
     return b1 + (s-a1)*(b2-b1)/(a2-a1);
@@ -112,29 +117,25 @@ float heightRaw(vec2 position) {
 }
 
 float height(vec2 position) {
-	float h = heightRaw(position);
+	float baseHeight = heightRaw(position);
 	vec4 weights = splatWeight(textureLod(terrainVert.splatmap, position, 0));
+
+	/// WAVE VARIANT 1
+	//float waveHeight = 0.15;
+	//float s = (sin(time + i_vertex.x*10 + i_vertex.x * time + i_vertex.z*0) + 1.0) / 2.0;
+	//float s2 = (sin(time*4 + i_vertex.x*5 + i_vertex.z*20) + 1.0) / 2.0;
+	//float s3 = (sin(time*8 + i_vertex.x*5 + i_vertex.z*1) + 1.0) / 2.0;
+	//float s4 = (cos(time*16 + i_vertex.x*50) + 1.0) / 2.0;
+	//float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
+	//return baseHeight + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4) * weights.g;
 	
-	float waveHeight = 0.15;
-	float s = (sin(time + i_vertex.x*10 + i_vertex.x * time + i_vertex.z*0) + 1.0) / 2.0;
-	float s2 = (sin(time*4 + i_vertex.x*5 + i_vertex.z*20) + 1.0) / 2.0;
-	float s3 = (sin(time*8 + i_vertex.x*5 + i_vertex.z*1) + 1.0) / 2.0;
-	float s4 = (cos(time*16 + i_vertex.x*50) + 1.0) / 2.0;
-	float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
-	return h + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4) * weights.g;
-	
-	//float waveHeight = 0.09;
-	//float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
-	//float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
-	//float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
-	//return h + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
+	/// WAVE VARIANT 2
+	float waveHeight = 0.59;
+	float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
+	float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
+	float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
+	return baseHeight + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
 }
-
-
-// /-----------------------------------------------------------------------------------------\
-// |                              3D simplex noise taken from                                |
-// |           https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83             |
-// \-----------------------------------------------------------------------------------------/
 
 vec3 findNormal(vec2 uv, float u) {
 	vec2 offsets[4];
@@ -148,14 +149,14 @@ vec3 findNormal(vec2 uv, float u) {
         hts[i] = height(offsets[i]);
     }
 
-	vec2 _step = vec2(2.0/64.0, 0.0);
+	vec2 _step = vec2(u, 0.0);
                
     vec3 va = normalize( vec3(_step.xy, hts[1]-hts[0]) );
     vec3 vb = normalize( vec3(_step.yx, hts[3]-hts[2]) );
     return cross(va,vb).xzy;
 }
 
-vec3 filterNormal(vec2 uv, float texelSize, int terrainSize) {
+vec3 findNormal2(vec2 uv, float texelSize, int terrainSize) {
 	float h[4];
 	h[0] = height(uv + texelSize * vec2(0,-1));// * terrainVert.height;
     h[1] = height(uv + texelSize * vec2(-1,0));// * terrainVert.height;
@@ -176,6 +177,43 @@ vec3 normalAttempt3(vec2 uv, float stepSize) {
 	float hR = height(uv + stepSize * vec2(1,0));
 	float hU = height(uv + stepSize * vec2(0,1));
 	return normalize(vec3(hL-hR, stepSize, hD - hU));
+}
+
+vec3 fuckThis(vec2 uv, float s) {
+	vec2 uvLeft = uv + vec2(-s, 0);
+	vec2 uvRight = uv + vec2(s, 0);
+	vec2 uvUp = uv + vec2(0, -s);
+	vec2 uvDown = uv + vec2(0, s);
+
+	float hLeft = height(uvLeft);
+	float hRight = height(uvRight);
+	float hUp = height(uvUp);
+	float hDown = height(uvDown);
+
+	// Take the difference left->right and down->up
+	float nX = (hLeft - hRight)/2.0;
+	float nY = 0.5;
+	float nZ = (hUp - hDown)/2.0;
+
+	return normalize(vec3(nX, nY, nZ));
+}
+
+vec3 version21102_final_final() {
+	float hCurrent = height(i_uv);
+	float hLeft    = height(i_uv + vec2(-0.01, 0));
+	float hRight   = height(i_uv + vec2(0.01, 0));
+	float hUp      = height(i_uv + vec2(0, -0.01));
+	float hDown    = height(i_uv + vec2(0, 0.01));
+
+	//float diffA = hLeft - hRight;
+	//float diffB = hUp - hDown;
+	float diffA1 = hLeft - hCurrent;
+	float diffA2 = hCurrent - hRight;
+	float diffB1 = hDown - hCurrent;
+	float diffB2 = hCurrent - hUp;
+	float avgA = (diffA1 + diffA2)/2;
+	float avgB = (diffB1 + diffB2)/2;
+	return normalize( vec3 (avgA ,terrainVert.normalStepSize, avgB) );
 }
 
 void main() {
@@ -262,12 +300,12 @@ void main() {
 
 		norm = normalize(N1 + N2 + N3 + N4);
 	} else {
-		norm = normalAttempt3(i_uv, terrainVert.normalStepSize);
+		norm = version21102_final_final();
 	}
 
 	
 	uv = i_uv;
-	normal = vec3(modelMatrix * vec4(norm, 1.0));
+	normal = vec3(modelMatrix * vec4(norm, 0.0));
 	//normal = norm;
 	fragPosition = vec3(modelMatrix * vec4(vertex, 1.0));
 }

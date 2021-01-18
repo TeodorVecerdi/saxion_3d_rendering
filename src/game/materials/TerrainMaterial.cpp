@@ -84,7 +84,7 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::J)) change -= 1;
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) change += 1;
 
-	normalStepSize += change * 0.005 * mge::Time::DeltaTime();
+	normalStepSize += change * 0.01 * mge::Time::DeltaTime();
 	std::cout << "Normal step size: " << normalStepSize << "\n"; 
 
 	const size_t lightCount = std::min(world->getLightCount(), TerrainMaterial::MAX_LIGHTS);
@@ -106,10 +106,13 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 	glUniform4fv(_shader->getUniformLocation("material.specular"), 1, glm::value_ptr(specularColor));
 	glUniform1f(_shader->getUniformLocation("material.shininess"), shininess);
 	glUniform1f(_shader->getUniformLocation("terrainVert.height"), height);
+	glUniform1f(_shader->getUniformLocation("terrainFrag.height"), height);
 	glUniform1f(_shader->getUniformLocation("terrainVert.normalStepSize"), normalStepSize);
+	glUniform1f(_shader->getUniformLocation("terrainFrag.uvS"), normalStepSize);
 
 	// Base
 	utils::gl::PassTexture(_shader, "terrainVert.heightmap", 0, heightmap->getId());
+	utils::gl::PassTexture(_shader, "terrainFrag.heightmap", 0, heightmap->getId());
 	utils::gl::PassTexture(_shader, "terrainVert.splatmap", 1, splatmap->getId());
 	utils::gl::PassTexture(_shader, "terrainFrag.splatmap", 1, splatmap->getId());
 
