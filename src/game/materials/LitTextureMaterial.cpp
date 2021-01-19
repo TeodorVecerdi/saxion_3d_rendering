@@ -71,8 +71,8 @@ void LitTextureMaterial::render(World* world, Mesh* mesh, const glm::mat4& model
 		glUniform3fv(_shader->getUniformLocation(lStr + ".direction"), 1, glm::value_ptr(ld.direction));
 		glUniform3fv(_shader->getUniformLocation(lStr + ".position"), 1, glm::value_ptr(ld.position));
 		glUniform4fv(_shader->getUniformLocation(lStr + ".ambient"), 1, glm::value_ptr(ld.ambient));
-		glUniform3fv(_shader->getUniformLocation(lStr + ".diffuse"), 1, glm::value_ptr(ld.diffuse));
-		glUniform3fv(_shader->getUniformLocation(lStr + ".specular"), 1, glm::value_ptr(ld.specular));
+		glUniform4fv(_shader->getUniformLocation(lStr + ".diffuse"), 1, glm::value_ptr(ld.diffuse));
+		glUniform4fv(_shader->getUniformLocation(lStr + ".specular"), 1, glm::value_ptr(ld.specular));
 		glUniform3fv(_shader->getUniformLocation(lStr + ".attenuation"), 1, glm::value_ptr(ld.attenuation));
 		glUniform1f(_shader->getUniformLocation(lStr + ".innerCutOff"), ld.innerCutOff);
 		glUniform1f(_shader->getUniformLocation(lStr + ".outerCutOff"), ld.outerCutOff);

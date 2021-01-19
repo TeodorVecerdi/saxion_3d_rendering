@@ -130,16 +130,16 @@ float height(vec2 position) {
 	//return baseHeight + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4) * weights.g;
 	
 	/// WAVE VARIANT 2
-	//float waveHeight = 0.28;
-	//float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
-	//float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
-	//float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
-	//return baseHeight + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
+	float waveHeight = 0.1;
+	float noise1 = 0.6 * (1.0 + simplex(vec3(4 * position, time * 0.3))) / 2.0;
+	float noise2 = 0.25 * (1.0 + simplex(vec3(8 * position, time * 0.5))) / 2.0;
+	float noise3 = 0.15 * (1.0 + simplex(vec3(16 * position, time * 0.47))) / 2.0;
+	return baseHeight + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
 
 	/// WAVE VARIANT 3
-	float waveHeight = 0.4;
-	float wave = (sin(time*2 + position.x*20 + position.y*20) + 1.0) / 2.0;
-	return baseHeight + waveHeight * wave * weights.g;
+	//float waveHeight = 0.4;
+	//float wave = (sin(time*2 + position.x*20 + position.y*20) + 1.0) / 2.0;
+	//return baseHeight + waveHeight * wave * weights.g;
 }
 
 vec3 calculateNormalA() {

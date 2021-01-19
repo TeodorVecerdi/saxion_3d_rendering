@@ -31,6 +31,7 @@
 
 #include "utils/constants.hpp"
 #include "config.hpp"
+#include "behaviours/DayNightCycleBehaviour.h"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEGame::MGEGame(): AbstractGame(), _hud(0) {
@@ -75,7 +76,7 @@ void MGEGame::_initializeScene() {
 	                                                       Texture::load(game::config::Texture("water_foam/foam.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
 	                                                       glm::vec4(13.5, 10, 8, 10),
-	                                                       0.5, 0.5*vertexDistance);
+	                                                       0.5, 0.5 * vertexDistance);
 	terrainMaterial->SetAmbientIntensity(0.2);
 	terrainMaterial->SetSpecularIntensity(0.3);
 	terrainMaterial->SetShininess(256);
@@ -157,18 +158,32 @@ void MGEGame::_initializeScene() {
 	auto* lightBeh2 = new SimpleLightBehaviour2({0, 20, 0}, 7.0f);
 	spotlight->SetBehaviour(lightBeh2);
 
-	Light* directional = new Light("Directional Light", {0, 10, 0});
-	const glm::vec3 lightDirection = glm::quat(glm::vec3(30, 45, 0) * utils::constants::degToRad) * utils::constants::forward;
-	directional->SetDirection(glm::normalize(lightDirection));
-	directional->Rotate(utils::constants::deg45, utils::constants::up);
-	directional->Rotate(utils::constants::deg30, utils::constants::right);
-	directional->SetAttenuation(1, 0, 0.0f);
-	directional->SetLightType(LightType::DIRECTIONAL);
-	directional->SetDiffuseColor(0.8 * glm::vec3(1.0f, 1.0f, 1.0f));
-	directional->SetAmbientColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.1f));
-	directional->SetSpecularColor(glm::vec3(210, 250, 248) / 255.0f);
-	auto* lightBeh3 = new LightRotatingBehaviour(utils::constants::deg45, {30, 0, 0});
-	//directional->SetBehaviour(lightBeh3);
+	Light* directionalDay = new Light("Directional Light", {0, 10, 0});
+	directionalDay->SetAttenuation(1, 0, 0.0f);
+	directionalDay->SetLightType(LightType::DIRECTIONAL);
+	directionalDay->SetDiffuseColor(glm::vec3(255, 237, 214) / 255.0f);
+	directionalDay->SetDiffuseIntensity(1.0f);
+	directionalDay->SetAmbientColor(glm::vec3(1.0));
+	directionalDay->SetAmbientIntensity(0.15f);
+	directionalDay->SetSpecularColor(glm::vec3(210, 250, 248) / 255.0f);
+	directionalDay->SetSpecularIntensity(1.0f);
+	Light* directionalNight = new Light("Directional Light - Night", {0, 10, 0});
+	directionalNight->SetAttenuation(1, 0, 0.0f);
+	directionalNight->SetLightType(LightType::DIRECTIONAL);
+	directionalNight->SetDiffuseColor(glm::vec3(232, 242, 255) / 255.0f);
+	directionalNight->SetDiffuseIntensity(0.2f);
+	directionalNight->SetAmbientColor(glm::vec3(232, 242, 255) / 255.0f);
+	directionalNight->SetAmbientIntensity(0.2f);
+	directionalNight->SetSpecularColor(glm::vec3(210, 250, 248) / 255.0f);
+	directionalNight->SetSpecularIntensity(2.0f);
+	_world->AddChild(directionalDay);
+	_world->AddChild(directionalNight);
+
+	GameObject* dayNightCycle = new GameObject("Day Night Cycle");
+	DayNightCycleBehaviour* dayNightCycleBehaviour = new DayNightCycleBehaviour(*directionalDay, *directionalNight, utils::constants::oneDeg * 15, utils::constants::right,
+	                                                                            glm::vec3(0, 15, 0));
+	dayNightCycle->SetBehaviour(dayNightCycleBehaviour);
+	_world->AddChild(dayNightCycle);
 
 	GameObject* lightCube = new GameObject("lightCube", glm::vec3(0, 0, 0));
 	lightCube->Rotate(-utils::constants::deg90, utils::constants::right);
@@ -176,8 +191,7 @@ void MGEGame::_initializeScene() {
 	lightCube->SetMesh(cylMesh);
 	lightCube->SetMaterial(lightMaterial);
 
-	directional->AddChild(lightCube);
-	_world->AddChild(directional);
+	directionalDay->AddChild(lightCube);
 
 	GameObject* lightCube2 = new GameObject("2", glm::vec3(0, 0, 0));
 	lightCube2->Scale(glm::vec3(0.5f));

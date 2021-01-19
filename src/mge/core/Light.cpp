@@ -6,9 +6,12 @@
 
 Light::Light(const std::string& name, const glm::vec3& position) : GameObject(name, position) {
 	SetDiffuseColor(utils::constants::one);
-	SetAmbientColor({utils::constants::one, 0.1f});
+	SetDiffuseIntensity(1.0f);
+	SetAmbientColor(utils::constants::one);
+	SetAmbientIntensity(0.1f);
 	SetSpecularColor(utils::constants::one);
-	SetAttenuation(glm::vec3(1,1,0)); // linear falloff
+	SetSpecularIntensity(0.5f);
+	SetAttenuation(glm::vec3(1,0.1,0.02)); // linear falloff
 	SetLightType(POINT);
 }
 
@@ -20,11 +23,23 @@ void Light::SetDirection(const glm::vec3 direction) {
 }
 
 void Light::SetDiffuseColor(const glm::vec3 color) {
-	lightData.diffuse = color;
+	lightData.diffuse.x = color.x;
+	lightData.diffuse.y = color.y;
+	lightData.diffuse.z = color.z;
 }
 
-void Light::SetAmbientColor(glm::vec4 color) {
-	lightData.ambient = color;
+void Light::SetDiffuseIntensity(float intensity) {
+	lightData.diffuse.w = intensity;
+}
+
+void Light::SetAmbientColor(glm::vec3 color) {
+	lightData.ambient.x = color.x;
+	lightData.ambient.y = color.y;
+	lightData.ambient.z = color.z;
+}
+
+void Light::SetAmbientIntensity(float intensity) {
+	lightData.ambient.w = intensity;
 }
 
 void Light::SetSpecularColor(glm::vec3 color) {

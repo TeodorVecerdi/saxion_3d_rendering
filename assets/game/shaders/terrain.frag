@@ -35,7 +35,7 @@ struct LightData {
     vec3 position; // used by point and spot
 
     vec4 ambient; // rgb=color, a=intensity
-    vec3 diffuse;
+    vec4 diffuse; // rgb=color, a=intensity
     vec4 specular; // rgb=color, a=intensity
 
     vec3 attenuation; // x = constant, y = linear, z = quadratic
@@ -95,8 +95,6 @@ vec3 calcNormal() {
 	float hU = height(uv + 0.01 * vec2(0,1));
 	return normalize(vec3(hL-hR, terrainFrag.uvS, hD - hU));
 }
-
-
 vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, float specularMask) {
     vec3 AMBIENT = light.ambient.a * light.ambient.rgb;
 
@@ -111,11 +109,11 @@ vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, float
     float dist = distance(light.position, fragPosition);
     float distSqr = dist * dist;
     float diffuseAmount = max(dot(norm, lightDir), 0.0);
-    vec3 DIFFUSE = diffuseAmount * light.diffuse;
+    vec3 DIFFUSE = diffuseAmount * light.diffuse.rgb;
 
     vec3 r = reflect(-lightDir, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = specularMask * shineFactor * light.specular;
+    vec3 SPECULAR = specularMask * shineFactor * light.specular.rgb;
     
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * dist + light.attenuation.z * distSqr);
     AMBIENT *= attenuation;
@@ -127,8 +125,8 @@ vec3 Spotlight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, float
 
     return (
         AMBIENT * diffuseSampled +
-        DIFFUSE * diffuseSampled +
-        SPECULAR * material.specular.rgb * material.specular.a
+        DIFFUSE * diffuseSampled * light.diffuse.a +
+        SPECULAR * material.specular.rgb * material.specular.a * light.specular.a
     );
 }
 
@@ -137,16 +135,16 @@ vec3 DirectionalLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled
     
     vec3 direction = normalize(-light.direction);
     float diffuseAmount = max(dot(norm, direction), 0.0);
-    vec3 DIFFUSE = diffuseAmount * light.diffuse;
+    vec3 DIFFUSE = diffuseAmount * light.diffuse.rgb;
     
     vec3 r = reflect(-direction, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = specularMask * shineFactor * light.specular;
+    vec3 SPECULAR = specularMask * shineFactor * light.specular.rgb;
     
     return (
         AMBIENT * diffuseSampled +
-        DIFFUSE * diffuseSampled +
-        SPECULAR * material.specular.rgb * material.specular.a
+        DIFFUSE * diffuseSampled * light.diffuse.a +
+        SPECULAR * material.specular.rgb * material.specular.a * light.specular.a
      );
 }
 
@@ -157,11 +155,11 @@ vec3 PointLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, floa
     float distSqr = dist * dist;
     vec3 direction = normalize(light.position - fragPosition);
     float diffuseAmount = max(dot(norm, direction), 0.0);
-    vec3 DIFFUSE = diffuseAmount * light.diffuse;
+    vec3 DIFFUSE = diffuseAmount * light.diffuse.rgb;
     
     vec3 r = reflect(-direction, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = specularMask * shineFactor * light.specular;
+    vec3 SPECULAR = specularMask * shineFactor * light.specular.rgb;
 
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * dist + light.attenuation.z * distSqr);
     
@@ -171,8 +169,8 @@ vec3 PointLight(LightData light, vec3 norm, vec3 view, vec3 diffuseSampled, floa
 
     return (
         AMBIENT * diffuseSampled +
-        DIFFUSE * diffuseSampled +
-        SPECULAR * material.specular.rgb * material.specular.a
+        DIFFUSE * diffuseSampled * light.diffuse.a +
+        SPECULAR * material.specular.rgb * material.specular.a * light.specular.a
     );
 }
 

@@ -18,8 +18,8 @@ struct LightData {
     vec3 position; // used by point and spot
 
     vec4 ambient; // rgb=color, a=intensity
-    vec3 diffuse;
-    vec3 specular;
+    vec4 diffuse; // rgb=color, a=intensity
+    vec4 specular; // rgb=color, a=intensity
 
     vec3 attenuation; // x = constant, y = linear, z = quadratic
 
@@ -52,11 +52,11 @@ vec3 Spotlight(LightData light, vec3 norm, vec3 view) {
     float dist = distance(light.position, fragPosition);
     float distSqr = dist * dist;
     float diffuseAmount = max(dot(norm, lightDir), 0.0);
-    vec3 DIFFUSE = diffuseAmount * light.diffuse;
+    vec3 DIFFUSE = diffuseAmount * light.diffuse.rgb;
 
     vec3 r = reflect(-lightDir, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = shineFactor * light.specular;
+    vec3 SPECULAR = shineFactor * light.specular.rgb;
     
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * dist + light.attenuation.z * distSqr);
     AMBIENT *= attenuation;
@@ -68,8 +68,8 @@ vec3 Spotlight(LightData light, vec3 norm, vec3 view) {
 
     return (
         AMBIENT * material.diffuse +
-        DIFFUSE * material.diffuse +
-        SPECULAR * material.specular.rgb * material.specular.a
+        DIFFUSE * material.diffuse * light.diffuse.a +
+        SPECULAR * material.specular.rgb * material.specular.a * light.specular.a
     );
 }
 
@@ -78,16 +78,16 @@ vec3 DirectionalLight(LightData light, vec3 norm, vec3 view) {
     
     vec3 direction = normalize(-light.direction);
     float diffuseAmount = max(dot(norm, direction), 0.0);
-    vec3 DIFFUSE = diffuseAmount * light.diffuse;
+    vec3 DIFFUSE = diffuseAmount * light.diffuse.rgb;
     
     vec3 r = reflect(-direction, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = shineFactor * light.specular;
+    vec3 SPECULAR = shineFactor * light.specular.rgb;
     
     return (
         AMBIENT * material.diffuse +
-        DIFFUSE * material.diffuse +
-        SPECULAR * material.specular.rgb * material.specular.a
+        DIFFUSE * material.diffuse * light.diffuse.a +
+        SPECULAR * material.specular.rgb * material.specular.a * light.specular.a
      );
 }
 
@@ -98,11 +98,11 @@ vec3 PointLight(LightData light, vec3 norm, vec3 view) {
     float distSqr = dist * dist;
     vec3 direction = normalize(light.position - fragPosition);
     float diffuseAmount = max(dot(norm, direction), 0.0);
-    vec3 DIFFUSE = diffuseAmount * light.diffuse;
+    vec3 DIFFUSE = diffuseAmount * light.diffuse.rgb;
     
     vec3 r = reflect(-direction, norm);
     float shineFactor = pow(max(dot(r, view), 0), material.shininess);
-    vec3 SPECULAR = shineFactor * light.specular;
+    vec3 SPECULAR = shineFactor * light.specular.rgb;
 
     float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * dist + light.attenuation.z * distSqr);
     
@@ -112,8 +112,8 @@ vec3 PointLight(LightData light, vec3 norm, vec3 view) {
 
     return (
         AMBIENT * material.diffuse +
-        DIFFUSE * material.diffuse +
-        SPECULAR * material.specular.rgb * material.specular.a
+        DIFFUSE * material.diffuse * light.diffuse.a +
+        SPECULAR * material.specular.rgb * material.specular.a * light.specular.a
     );
 }
 

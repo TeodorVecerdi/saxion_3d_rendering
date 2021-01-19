@@ -38,6 +38,11 @@ namespace utils::math {
 		return Clamp(t - Floor(t / length) * length, 0.0f, length);
 	}
 
+	inline float WrapPi(const float angle) {
+		const float a = fmod(angle + constants::pi, constants::twoPi);
+		return a >= 0 ? a - constants::pi : a + constants::pi;
+	}
+
 	inline float LerpAngle(const float from, const float to, const float t) {
 		float delta = Repeat(to - from, 360.0f);
 		if (delta > 180) delta -= 360;
