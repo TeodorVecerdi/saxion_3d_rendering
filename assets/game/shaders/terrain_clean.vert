@@ -178,7 +178,7 @@ void main() {
 	vec3 norm = calculateNormalA();
 
 	uv = i_uv;
-	normal = norm;
-	//normal = vec3(modelMatrix * vec4(norm, 0.0));
+	//normal = norm;
+	normal = vec3(modelMatrix * vec4(norm, 0.0));
 	fragPosition = vec3(modelMatrix * vec4(vertex, 1.0));
 }

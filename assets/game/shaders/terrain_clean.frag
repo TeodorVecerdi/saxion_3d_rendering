@@ -230,7 +230,6 @@ vec4 triplanar(sampler2D tex, vec3 blending, vec3 coords, float worldScale) {
     vec4 yAxis = texture2D(tex, coords.xz * worldScale);
     vec4 zAxis = texture2D(tex, coords.xy * worldScale);
     return blending.x * xAxis + blending.y * yAxis + blending.z * zAxis;
-    return vec4(0);
 }
 
 float heightRaw(vec2 position) {
@@ -315,7 +314,7 @@ void main() {
     vec4 textureWater = texAWeight * (texAAW * textureWaterA + texABW * textureWaterB + texACW * textureWaterC) + foamWeight * foamTex;
 
     vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWater + weights.b * textureB);
-    float specularMask = weights.g + weights.b;//1.0; 
+    float specularMask = weights.g + weights.b; //1.0; 
 
     vec3 light = vec3(0);
 

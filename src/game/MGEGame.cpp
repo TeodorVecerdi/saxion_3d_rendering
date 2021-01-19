@@ -76,7 +76,7 @@ void MGEGame::_initializeScene() {
 	                                                       Texture::load(game::config::Texture("water_foam/foam.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
 	                                                       glm::vec4(13.5, 10, 8, 10),
-	                                                       0.5, 0.5 * vertexDistance);
+	                                                       1, 0.5 * vertexDistance);
 	terrainMaterial->SetAmbientIntensity(0.2);
 	terrainMaterial->SetSpecularIntensity(0.3);
 	terrainMaterial->SetShininess(256);
