@@ -34,8 +34,8 @@ void TerrainMaterial::_lazyInitializeShader() {
 	//this shader contains everything the material can do (it can render something in 3d using a single color)
 	if (!_shader) {
 		_shader = new ShaderProgram();
-		_shader->addShader(GL_VERTEX_SHADER, game::config::Shader("terrain.vert"));
-		_shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("terrain.frag"));
+		_shader->addShader(GL_VERTEX_SHADER, game::config::Shader("terrain_clean.vert"));
+		_shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("terrain_clean.frag"));
 		_shader->finalize();
 	}
 }
@@ -96,7 +96,7 @@ void TerrainMaterial::render(World* world, Mesh* mesh, const glm::mat4& modelMat
 		glUniform3fv(_shader->getUniformLocation(lStr + ".position"), 1, glm::value_ptr(ld.position));
 		glUniform4fv(_shader->getUniformLocation(lStr + ".ambient"), 1, glm::value_ptr(ld.ambient));
 		glUniform3fv(_shader->getUniformLocation(lStr + ".diffuse"), 1, glm::value_ptr(ld.diffuse));
-		glUniform3fv(_shader->getUniformLocation(lStr + ".specular"), 1, glm::value_ptr(ld.specular));
+		glUniform4fv(_shader->getUniformLocation(lStr + ".specular"), 1, glm::value_ptr(ld.specular));
 		glUniform3fv(_shader->getUniformLocation(lStr + ".attenuation"), 1, glm::value_ptr(ld.attenuation));
 		glUniform1f(_shader->getUniformLocation(lStr + ".innerCutOff"), ld.innerCutOff);
 		glUniform1f(_shader->getUniformLocation(lStr + ".outerCutOff"), ld.outerCutOff);

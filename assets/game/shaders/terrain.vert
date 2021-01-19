@@ -303,9 +303,8 @@ void main() {
 		norm = version21102_final_final();
 	}
 
-	
 	uv = i_uv;
-	normal = vec3(modelMatrix * vec4(norm, 0.0));
+	normal = norm;
 	//normal = norm;
 	fragPosition = vec3(modelMatrix * vec4(vertex, 1.0));
 }

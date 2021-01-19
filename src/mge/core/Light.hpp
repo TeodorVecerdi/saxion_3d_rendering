@@ -17,7 +17,7 @@ struct LightData {
 
 	glm::vec4 ambient;
 	glm::vec3 diffuse;
-	glm::vec3 specular;
+	glm::vec4 specular;
 	
 	glm::vec3 attenuation; // x = const, y = linear, z = quadratic
 
@@ -45,6 +45,8 @@ public:
 
 	glm::vec3 GetSpecularColor() const { return lightData.specular; }
 	void SetSpecularColor(glm::vec3 color);
+	float GetSpecularIntensity() const { return lightData.specular.w; }
+	void SetSpecularIntensity(float intensity);
 
 	glm::vec3 GetAttenuation() const { return lightData.attenuation; }
 	void SetAttenuation(glm::vec3 attenuation);

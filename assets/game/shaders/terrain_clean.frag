@@ -13,7 +13,7 @@ struct MaterialData {
 struct TerrainData {
     sampler2D splatmap;
     sampler2D heightmap;
-    float uvS;
+    float uvS;//normal step size
     float height;
 
     sampler2D baseTexture;
@@ -63,37 +63,6 @@ vec4 splatWeight(vec4 splatTex) {
 	vec4 weight = vec4(splatTex.xyz, 0);
 	weight.w = clamp(1.0 - (weight.x + weight.y + weight.z), 0.0, 1.0);
 	return weight;
-}
-
-float heightRaw(vec2 position) {
-	return texture(terrainFrag.heightmap, position).r;
-}
-
-float height(vec2 position) {
-	float h = heightRaw(position);
-	vec4 weights = splatWeight(texture(terrainFrag.splatmap, position));
-	
-	float waveHeight = 0.15;
-	float s = (sin(time + fragPosition.x*10 + fragPosition.x * time + fragPosition.z*0) + 1.0) / 2.0;
-	float s2 = (sin(time*4 + fragPosition.x*5 + fragPosition.z*20) + 1.0) / 2.0;
-	float s3 = (sin(time*8 + fragPosition.x*5 + fragPosition.z*1) + 1.0) / 2.0;
-	float s4 = (cos(time*16 + fragPosition.x*50) + 1.0) / 2.0;
-	float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
-	return h + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4) * weights.g;
-	
-	//float waveHeight = 0.09;
-	//float noise1 = 0.6 * (1.0 + simplex(vec3(2 * fragPosition.xz, time * 0.3))) / 2.0;
-	//float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
-	//float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
-	//return h + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
-}
-
-vec3 calcNormal() {
-    float hD = height(uv + 0.01 * vec2(0,-1));
-	float hL = height(uv + 0.01 * vec2(-1,0));
-	float hR = height(uv + 0.01 * vec2(1,0));
-	float hU = height(uv + 0.01 * vec2(0,1));
-	return normalize(vec3(hL-hR, terrainFrag.uvS, hD - hU));
 }
 
 
@@ -184,9 +153,53 @@ vec4 triplanar(sampler2D tex, vec3 blending, vec3 coords, float worldScale) {
     return vec4(0);
 }
 
+float heightRaw(vec2 position) {
+	return texture(terrainFrag.heightmap, position).r;
+}
+
+float height(vec2 position) {
+	float baseHeight = heightRaw(position);
+	vec4 weights = splatWeight(texture(terrainFrag.splatmap, position));
+
+	/// WAVE VARIANT 1
+	//float waveHeight = 0.15;
+	//float s = (sin(time + i_vertex.x*10 + i_vertex.x * time + i_vertex.z*0) + 1.0) / 2.0;
+	//float s2 = (sin(time*4 + i_vertex.x*5 + i_vertex.z*20) + 1.0) / 2.0;
+	//float s3 = (sin(time*8 + i_vertex.x*5 + i_vertex.z*1) + 1.0) / 2.0;
+	//float s4 = (cos(time*16 + i_vertex.x*50) + 1.0) / 2.0;
+	//float s5 = (sin(time + 3.141592) + 1.0) / 2.0;
+	//return baseHeight + (waveHeight * 0.1 * s5 + waveHeight * 0.6 * s + waveHeight * 0.2 * s2 + waveHeight * 0.07 * s3 + waveHeight * 0.03 * s4) * weights.g;
+	
+	/// WAVE VARIANT 2
+	//float waveHeight = 0.28;
+	//float noise1 = 0.6 * (1.0 + simplex(vec3(2 * i_vertex.xz, time * 0.3))) / 2.0;
+	//float noise2 = 0.25 * (1.0 + simplex(vec3(8 * i_vertex.xz, time * 0.5))) / 2.0;
+	//float noise3 = 0.15 * (1.0 + simplex(vec3(16 * i_vertex.xz, time * 0.47))) / 2.0;
+	//return baseHeight + (noise1 + noise2 + noise3) * waveHeight * weights.g * weights.g;
+
+	/// WAVE VARIANT 3
+	float waveHeight = 0.4;
+	float wave = (sin(time*2 + position.x*20 + position.y*20) + 1.0) / 2.0;
+	return baseHeight + waveHeight * wave * weights.g;
+}
+
+vec3 calculateNormalB() {
+	float hLeft    = height(uv + vec2(-0.01, 0));
+	float hRight   = height(uv + vec2(0.01, 0));
+	float hUp      = height(uv + vec2(0, -0.01));
+	float hDown    = height(uv + vec2(0, 0.01));
+	float diffA = hLeft - hRight;
+	float diffB = hUp - hDown;
+	return normalize(vec3(diffA, terrainFrag.uvS, -diffB));
+}
+
 void main() {
     // Precompute common values
-    vec3 norm = normalize(normal);
+    vec3 norm;
+    if(shouldTriplanar)
+        norm = normalize(normal);
+    else
+        norm = calculateNormalB();
     vec3 view = normalize(eye - fragPosition);
 
     vec3 blending = normalize(max(abs(normal), 0.000001));
@@ -204,23 +217,14 @@ void main() {
     vec4 textureWaterC;
     vec4 foamTex;
 
-    if(shouldTriplanar) {
-        baseTexture = triplanar(terrainFrag.baseTexture, blending, fragPosition, 0.7/terrainFrag.baseSize);
-        textureR = triplanar(terrainFrag.textureR, blending, fragPosition, 0.7/terrainFrag.sizeR);
-        textureB = triplanar(terrainFrag.textureB, blending, fragPosition, 0.7/terrainFrag.sizeB);
-        textureWaterA = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(4,2, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA);
-        textureWaterB = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(-6,1, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA * 0.7);
-        textureWaterC = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(-1,-7, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA * 4);
-        foamTex = triplanar(terrainFrag.waterB, blending, (fragPosition + 0.15 * vec3(sin(time * 0.45) * 0.05, cos(time * 0.75 + 2.6) * 0.05, 0)), 0.7 / terrainFrag.sizeWaterB);
-    } else {
-        baseTexture = texture2D(terrainFrag.baseTexture, uv * terrainFrag.baseSize);
-        textureR = texture2D(terrainFrag.textureR, uv * terrainFrag.sizeR);
-        textureB = texture2D(terrainFrag.textureB, uv * terrainFrag.sizeB);
-        textureWaterA = texture2D(terrainFrag.waterA, (uv + time*vec2(0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA);
-        textureWaterB = texture2D(terrainFrag.waterA, (uv + 0.7*time*vec2(-0.02,0.01/*direction*/)) * terrainFrag.sizeWaterA * 0.7);
-        textureWaterC = texture2D(terrainFrag.waterA, (uv + 0.4*time*vec2(-0.02,-0.01/*direction*/)) * terrainFrag.sizeWaterA * 4);
-        foamTex = texture2D(terrainFrag.waterB, (uv + 0.15 * vec2(sin(time * 0.45) * 0.05, cos(time * 0.75 + 2.6) * 0.05)) * terrainFrag.sizeWaterB);
-    }
+    baseTexture = triplanar(terrainFrag.baseTexture, blending, fragPosition, 0.7/terrainFrag.baseSize);
+    textureR = triplanar(terrainFrag.textureR, blending, fragPosition, 0.7/terrainFrag.sizeR);
+    textureB = triplanar(terrainFrag.textureB, blending, fragPosition, 0.7/terrainFrag.sizeB);
+    textureWaterA = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(4,2, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA);
+    textureWaterB = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(-6,1, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA * 0.7);
+    textureWaterC = triplanar(terrainFrag.waterA,blending, (fragPosition + time*vec3(-1,-7, 0/*direction*/)), 0.7/terrainFrag.sizeWaterA * 4);
+    foamTex = triplanar(terrainFrag.waterB, blending, (fragPosition + 0.15 * vec3(sin(time * 0.45) * 0.05, cos(time * 0.75 + 2.6) * 0.05, 0)), 0.7 / terrainFrag.sizeWaterB);
+
 
     // blend water
     float foamWeight = 0.0 + 0.0 * (sin(time*4) + 1.0) / 2;
@@ -231,10 +235,7 @@ void main() {
     vec4 textureWater = texAWeight * (texAAW * textureWaterA + texABW * textureWaterB + texACW * textureWaterC) + foamWeight * foamTex;
 
     vec3 diffuseTexture = vec3(baseWeight * baseTexture + weights.r * textureR + weights.g * textureWater + weights.b * textureB);
-
-    float specularMask = weights.g + weights.b;
-
-    diffuseTexture = vec3(0.8);
+    float specularMask = 1.0;// weights.g + weights.b; 
 
     vec3 light = vec3(0);
 
@@ -248,5 +249,5 @@ void main() {
         }
     }
 
-    FragColor = vec4(abs(norm), 1);
+    FragColor = vec4(light, 1);
 }

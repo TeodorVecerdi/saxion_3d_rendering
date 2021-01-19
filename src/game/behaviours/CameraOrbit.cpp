@@ -10,7 +10,7 @@
 #include "mge/util/Input.hpp"
 
 CameraOrbit::CameraOrbit(GameObject* target, glm::vec3 offset, glm::vec3 eulerAngles, float orbitSpeed, float mouseSensitivity, float scrollSensitivity) :
-target(target), currentPosition(0), offset(offset), orbitSpeed(orbitSpeed), mouseSensitivity(mouseSensitivity), scrollSensitivity(scrollSensitivity), zoomRange(-2, -200) {
+target(target), currentPosition(0), offset(offset), orbitSpeed(orbitSpeed), mouseSensitivity(mouseSensitivity), scrollSensitivity(scrollSensitivity), zoomRange(-2, -20) {
 
 	targetAngleY = utils::constants::degToRad * eulerAngles.y;
 	targetAngleX = utils::constants::degToRad * eulerAngles.x;
@@ -71,6 +71,10 @@ void CameraOrbit::LateUpdate(const float ts) {
 	auto matrix = translation * rotation;
 
 	_owner->SetTransform(matrix);
+}
+
+void CameraOrbit::SetZoomRange(glm::vec2 zoomRange) {
+	this->zoomRange = zoomRange;
 }
 
 void CameraOrbit::UpdateInput(const float ts) {

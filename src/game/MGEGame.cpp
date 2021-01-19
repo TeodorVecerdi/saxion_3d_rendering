@@ -8,30 +8,29 @@
 #include "mge/core/Texture.hpp"
 #include "mge/core/Camera.hpp"
 #include "mge/core/GameObject.hpp"
+#include "mge/core/Light.hpp"
 
 #include "mge/materials/AbstractMaterial.hpp"
-#include "mge/materials/ColorMaterial.hpp"
 #include "mge/materials/TextureMaterial.hpp"
 
 #include "mge/behaviours/KeysBehaviour.hpp"
 
 #include "mge/util/DebugHud.hpp"
-
 #include "mge/config.hpp"
-#include "game/MGEGame.hpp"
 
-#include "config.hpp"
+#include "game/MGEGame.hpp"
 #include "behaviours/CameraOrbit.h"
 #include "behaviours/LightRotatingBehaviour.h"
-#include "behaviours/ObjectFollow.h"
 #include "behaviours/SimpleLightBehaviour.h"
 #include "behaviours/SimpleLightBehaviour2.h"
+
 #include "materials/LitColorMaterial.hpp"
 #include "materials/LitTextureMaterial.hpp"
 #include "materials/TerrainMaterial.hpp"
 #include "materials/WobbleTextureMaterial.hpp"
-#include "mge/core/Light.hpp"
+
 #include "utils/constants.hpp"
+#include "config.hpp"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEGame::MGEGame(): AbstractGame(), _hud(0) {
@@ -71,15 +70,15 @@ void MGEGame::_initializeScene() {
 	TerrainMaterial* terrainMaterial = new TerrainMaterial(Texture::load(game::config::Texture("terrain/heightmap.png"), Texture::UV_WRAP::CLAMP),
 	                                                       Texture::load(game::config::Texture("terrain/splatmap.png"), Texture::UV_WRAP::CLAMP),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse1.jpg")),
-	                                                       Texture::load(game::config::Texture("terrain/uvtex.png")),
+	                                                       Texture::load(mge::config::Texture("terrain/diffuse3.jpg")),
 	                                                       Texture::load(game::config::Texture("water_seamless/water.jpg")),
 	                                                       Texture::load(game::config::Texture("water_foam/foam.jpg")),
 	                                                       Texture::load(mge::config::Texture("terrain/diffuse4.jpg")),
 	                                                       glm::vec4(13.5, 10, 8, 10),
 	                                                       0.5, 0.5*vertexDistance);
-	terrainMaterial->SetAmbientIntensity(0.1);
-	terrainMaterial->SetSpecularIntensity(0.5);
-	terrainMaterial->SetShininess(64);
+	terrainMaterial->SetAmbientIntensity(0.2);
+	terrainMaterial->SetSpecularIntensity(0.3);
+	terrainMaterial->SetShininess(256);
 
 	LitTextureMaterial* trafficConeMaterial = new LitTextureMaterial(Texture::load(game::config::Texture("traffic_cone/diffuse.png")));
 	trafficConeMaterial->SetAmbientIntensity(0.1f);
@@ -126,13 +125,14 @@ void MGEGame::_initializeScene() {
 	mainSphere->AddChild(cubeRight);
 	mainSphere->AddChild(cubeForward);
 
-	GameObject* bigSphere = new GameObject("bigSphere", utils::constants::up * 10);
+	GameObject* bigSphere = new GameObject("bigSphere", utils::constants::up * 55);
 	bigSphere->SetMesh(sphereSmoothMesh);
 	bigSphere->SetMaterial(litMaterial);
-	bigSphere->Scale(glm::vec3(10));
+	bigSphere->Scale(glm::vec3(14));
 	_world->AddChild(bigSphere);
 
 	auto* cameraOrbit = new CameraOrbit(mainSphere, glm::vec3(0, 0, -10), glm::vec3(-25, 180, 0));
+	cameraOrbit->SetZoomRange({-2, -400});
 	camera->SetBehaviour(cameraOrbit);
 
 	// Light

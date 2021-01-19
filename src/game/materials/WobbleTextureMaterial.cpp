@@ -21,8 +21,8 @@ WobbleTextureMaterial::~WobbleTextureMaterial() {}
 void WobbleTextureMaterial::_lazyInitializeShader() {
     if (!_shader) {
         _shader = new ShaderProgram();
-        _shader->addShader(GL_VERTEX_SHADER, game::config::Shader("wobble.vert"));
-        _shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("texture.frag"));
+        _shader->addShader(GL_VERTEX_SHADER, game::config::Shader("old/wobble.vert"));
+        _shader->addShader(GL_FRAGMENT_SHADER, game::config::Shader("old/texture.frag"));
         _shader->finalize();
 
         //cache all the uniform and attribute indexes

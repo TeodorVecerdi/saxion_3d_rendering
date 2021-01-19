@@ -28,7 +28,13 @@ void Light::SetAmbientColor(glm::vec4 color) {
 }
 
 void Light::SetSpecularColor(glm::vec3 color) {
-	lightData.specular = color;
+	lightData.specular.x = color.x;
+	lightData.specular.y = color.y;
+	lightData.specular.z = color.z;
+}
+
+void Light::SetSpecularIntensity(float intensity) {
+	lightData.specular.w = intensity;
 }
 
 void Light::SetAttenuation(const glm::vec3 attenuation) {
